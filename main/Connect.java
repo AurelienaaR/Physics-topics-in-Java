@@ -9,7 +9,6 @@ import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-
 import model.Topic;
 // import model.Domain;
 import model.Variable;
@@ -197,6 +196,7 @@ public class Connect {
 					while (resDomains.next()) {
 						for (int op = 1; op <= resDom.getColumnCount(); op++) {
 							domxStr = resDomains.getObject(op).toString();
+							System.out.println(domxStr);
 						}
 					}
 

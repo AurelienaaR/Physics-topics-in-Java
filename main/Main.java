@@ -40,6 +40,8 @@ import javax.swing.border.Border;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import listeners.DimListener;
+import listeners.TypeListener;
 import model.Topic;
 import model.Variable;
 
@@ -97,23 +99,25 @@ public class Main extends JFrame implements ActionListener, ItemListener, ListSe
 	private DefaultListModel<String> listModelVisible = new DefaultListModel<String>();
 	private DefaultListModel<String> listModelHidden = new DefaultListModel<String>();
 	private DefaultComboBoxModel<String> listModelDomain = new DefaultComboBoxModel<String>();
+	public static String[] typeTab = { "Scalaires discrets", "Scalaires continus", "Vecteurs", "Tenseurs, matrices",
+			"Autre" };
+	public static String[] dimTab = { "-1 - questions", "0 - état", "1 - solutions - causes directes",
+			"2 - solutions - champ d'évolutions" };
 
 	public static JPanel PanDialX() {
 
 		JPanel panInt = new JPanel();
 		panInt.setSize(1400, 200);
-		// panInt.setBackground(Color.yellow);
-
 		JPanel panType = new JPanel();
-		// panType.setBackground(Color.blue);
 		panType.setPreferredSize(new Dimension(220, 60));
 		panType.setBorder(BorderFactory.createTitledBorder("Type du thème"));
 		JComboBox<String> type = new JComboBox<String>();
-		type.addItem("Scalaires discrets");
-		type.addItem("Scalaires continus");
-		type.addItem("Vecteurs");
-		type.addItem("Tenseurs, matrices");
-		type.addItem("Autre");
+		TypeListener typeListener = new TypeListener();
+		for (int iTy = 0; iTy < typeTab.length; iTy++) {
+			type.addItem(typeTab[iTy]);
+		}
+		type.addActionListener(typeListener);
+
 		JLabel typeLabel = new JLabel("Type : ");
 		panType.add(typeLabel);
 		panType.add(type);
@@ -121,21 +125,19 @@ public class Main extends JFrame implements ActionListener, ItemListener, ListSe
 		JPanel panDim = new JPanel();
 		panDim.setBackground(Color.white);
 		panDim.setBorder(BorderFactory.createTitledBorder("Dimension du thème "));
-		panDim.setPreferredSize(new Dimension(440, 60));
-		JRadioButton option1 = new JRadioButton("-1 - questions");
-		option1.setSelected(true);
-		JRadioButton option2 = new JRadioButton("0 - état");
-		JRadioButton option3 = new JRadioButton("1 - solutions - causes directes");
-		JRadioButton option4 = new JRadioButton("2 - solutions - champ d'évolutions");
+		panDim.setPreferredSize(new Dimension(440, 90));
+		ButtonGroup group = new ButtonGroup();
+		JRadioButton[] dimOption = new JRadioButton[dimTab.length];
 		ButtonGroup bg = new ButtonGroup();
-		bg.add(option1);
-		bg.add(option2);
-		bg.add(option3);
-		bg.add(option4);
-		panDim.add(option1);
-		panDim.add(option2);
-		panDim.add(option3);
-		panDim.add(option4);
+		DimListener dimListener = new DimListener();
+		for (int iRb = 0; iRb < dimTab.length; iRb++) {
+			dimOption[iRb] = new JRadioButton(dimTab[iRb]);
+			dimOption[iRb].addActionListener(dimListener);
+			group.add(dimOption[iRb]);
+			bg.add(dimOption[iRb]);
+			panDim.add(dimOption[iRb]);
+		}
+		dimOption[0].setSelected(true);
 
 		JPanel panTitle = new JPanel();
 		panTitle.setBackground(Color.white);
@@ -148,7 +150,6 @@ public class Main extends JFrame implements ActionListener, ItemListener, ListSe
 		panTitle.add(titleJ);
 
 		JPanel content = new JPanel();
-		// content.setBackground(Color.red);
 		content.add(panType);
 		content.add(panDim);
 		content.add(panTitle);
@@ -163,10 +164,14 @@ public class Main extends JFrame implements ActionListener, ItemListener, ListSe
 			}
 
 			public String getDim() {
-				return (option1.isSelected()) ? option1.getText()
-						: (option2.isSelected()) ? option2.getText()
-								: (option3.isSelected()) ? option3.getText()
-										: (option4.isSelected()) ? option4.getText() : option1.getText();
+				int iRbSel = 0;
+				while (iRbSel < dimTab.length) {
+					if (dimOption[iRbSel].isSelected()) {
+						return dimOption[iRbSel].getText();
+					}
+					iRbSel++;
+				}
+				return dimOption[0].getText();
 			}
 
 			public String getTitle() {
@@ -211,7 +216,6 @@ public class Main extends JFrame implements ActionListener, ItemListener, ListSe
 		for (Iterator<Variable> iter = variablesObj.iterator(); iter.hasNext();) {
 			Variable v = iter.next();
 			variables.add(v.getTitle());
-
 		}
 
 		contents = new JPanel();
@@ -443,12 +447,6 @@ public class Main extends JFrame implements ActionListener, ItemListener, ListSe
 		Variable eltSup;
 		ArrayList<Variable> listVar = Connect.connect(); // Elements.Element();
 		for (int k = 0; k < listVar.size(); k++) {
-			System.out.println("k : " + k);
-			System.out.println("Contenu : " + listVar.get(k).getContent());
-			System.out.println("Continuité : " + listVar.get(k).getContinuity());
-			System.out.println("Extensivité : " + listVar.get(k).getExtensivity());
-			System.out.println("Type : " + listVar.get(k).getType());
-
 			Array Arrx = listVar.get(k).getType();
 			Integer[] typex = (Integer[]) Arrx.getArray();
 			System.out.println(Arrays.toString(typex));
@@ -458,17 +456,10 @@ public class Main extends JFrame implements ActionListener, ItemListener, ListSe
 				System.out.println("element " + i + " = " + iLevPlus);
 				if (iLevPlus < listVar.size()) {
 					eltSup = listVar.get(iLevPlus);
-					if (listVar.contains(eltSup)) {
-						System.out.println("element sup " + iLevPlus + " = " + eltSup.getContent());
-						System.out.println("Contenu sup : " + eltSup.getContent());
-						System.out.println(eltSup.getContinuity());
-						System.out.println(eltSup.getExtensivity());
-						System.out.println("Type sup : " + eltSup.getType());
-					}
+					System.out.println(eltSup.toString());
 				}
 			}
-			System.out.println("Dim : " + listVar.get(k).getDim());
-			System.out.println("Domain : " + listVar.get(k).getDomain());
+
 		}
 
 		int iSelected = listHidden.getSelectedIndex();
@@ -592,6 +583,13 @@ public class Main extends JFrame implements ActionListener, ItemListener, ListSe
 		if (title.matches("^[0-9.]+$")) {
 			list.add(new Variable(id, title, domain, type, characteristics, dim, extensivity, continuity, content,
 					idLevelInt, saved));
+		}
+	}
+
+	public void createTopic(int id, ArrayList<Topic> listTop, int iddomain, String title, Array arrvar, String content,
+			int idtype) {
+		if (title.matches("^[0-9.]+$")) {
+			listTop.add(new Topic(id, iddomain, title, arrvar, content, idtype));
 		}
 	}
 

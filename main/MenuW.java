@@ -27,6 +27,23 @@ public class MenuW extends JMenu {
 		for (int jPr = 0; jPr < subItemProjectLabel.length; jPr++) {
 			subItemProject.add(new JMenuItem(subItemProjectLabel[jPr]));
 			menuProject.add(subItemProject.get(jPr));
+			switch(jPr) {
+			case 0 : 
+				break;
+			case 1 :
+				break;
+			case 2 : 
+				break;
+			case 3 : 
+				subItemProject.get(jPr).addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent arg0) {
+						System.exit(0);
+					}
+				});
+				break;
+			default : 
+				break;
+			}
 		}
 		for (int iEd = 0; iEd < subMenuEditionLabel.length; iEd++) {
 			subMenuEdition.add(new JMenu(subMenuEditionLabel[iEd]));
@@ -37,6 +54,22 @@ public class MenuW extends JMenu {
 		for (int ixEd = 0; ixEd < subMenuEditionLabel.length; ixEd++) {
 			for (int jSIEd = 0; jSIEd < subItemEditionLabel.length; jSIEd++) {
 				subMenuEdition.get(ixEd).add(subItemEdition.get(3 * ixEd + jSIEd));
+				switch(ixEd) {
+				case 0 : 
+					break;
+				case 1 :
+					break;
+				case 2 : 
+					break;
+				case 3 : 
+					break;
+				case 4 :
+					break;
+				case 5 : 
+					break;
+				default : 
+					break;
+				}
 			}
 			menuEdition.add(subMenuEdition.get(ixEd));
 		}
