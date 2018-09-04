@@ -18,6 +18,7 @@ public class Topic {
 	private final StringProperty content;
 	private final IntegerProperty idtype;
 
+
 	/**
 	 * Constructor
 	 * 
@@ -110,5 +111,5 @@ public class Topic {
 	public IntegerProperty idtypeProperty() {
 		return idtype;
 	}
-
+	
 }

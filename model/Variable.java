@@ -1,7 +1,7 @@
 package model;
 
-import java.time.LocalDate;
 import java.sql.Array;
+
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -12,46 +12,40 @@ import javafx.beans.property.StringProperty;
 public class Variable {
 
 	private final IntegerProperty id;
-	private final StringProperty title;
-	private final StringProperty domain;
-	private final ObjectProperty<Array> type;
-	private final StringProperty characteristics;
 	private final IntegerProperty dim;
-	private final StringProperty extensivity;
-	private final StringProperty continuity;
+	private final IntegerProperty idExtensivity;
+	private final IntegerProperty idContinuity;
+	private final IntegerProperty idCharacteristics;
+	private final StringProperty title;
 	private final StringProperty content;
-	private final IntegerProperty idLevelInt;
-	private final ObjectProperty<LocalDate> saved;
+	private final IntegerProperty idLevel;
+	private final ObjectProperty<Array> arrType;
 
 	/**
 	 * Constructor
 	 * 
 	 * @param id
-	 * @param title
-	 * @param domain
-	 * @param type
-	 * @param characteristics
 	 * @param dim
-	 * @param extensivity
-	 * @param continuity
+	 * @param idExtensivity
+	 * @param idContinuity
+	 * @param idCharacteristics
+	 * @param title
 	 * @param content
-	 * @param idLevelInt
-	 * @param saved
+	 * @param idLevel
+	 * @param arrType
 	 */
 
-	public Variable(int id, String title, String domain, Array type, String characteristics, int dim,
-			String extensivity, String continuity, String content, int idLevelInt, LocalDate saved) {
+	public Variable(int id, int dim, int idExtensivity, int idContinuity, int idCharacteristics, String title,
+			String content, int idLevel, Array arrType) {
 		this.id = new SimpleIntegerProperty(id);
-		this.title = new SimpleStringProperty(title);
-		this.domain = new SimpleStringProperty(domain);
-		this.type = new SimpleObjectProperty<Array>(type);
-		this.characteristics = new SimpleStringProperty(characteristics);
 		this.dim = new SimpleIntegerProperty(dim);
-		this.extensivity = new SimpleStringProperty(extensivity);
-		this.continuity = new SimpleStringProperty(continuity);
+		this.idExtensivity = new SimpleIntegerProperty(idExtensivity);
+		this.idContinuity = new SimpleIntegerProperty(idContinuity);
+		this.idCharacteristics = new SimpleIntegerProperty(idCharacteristics);
+		this.title = new SimpleStringProperty(title);
 		this.content = new SimpleStringProperty(content);
-		this.idLevelInt = new SimpleIntegerProperty(idLevelInt);
-		this.saved = new SimpleObjectProperty<LocalDate>(saved);
+		this.idLevel = new SimpleIntegerProperty(idLevel);
+		this.arrType = new SimpleObjectProperty<Array>(arrType);
 	}
 
 	public int getId() {
@@ -60,54 +54,6 @@ public class Variable {
 
 	public void setId(int id) {
 		this.id.set(id);
-	}
-
-	public String getTitle() {
-		return title.get();
-	}
-
-	public void setTitle(String title) {
-		this.title.set(title);
-	}
-
-	public StringProperty titleProperty() {
-		return title;
-	}
-
-	public String getDomain() {
-		return domain.get();
-	}
-
-	public void setDomain(String domain) {
-		this.domain.set(domain);
-	}
-
-	public StringProperty domainProperty() {
-		return domain;
-	}
-
-	public Array getType() {
-		return type.get();
-	}
-
-	public void setType(Array type) {
-		this.type.set(type);
-	}
-
-	public ObjectProperty<Array> typeProperty() {
-		return type;
-	}
-
-	public String getCharacteristics() {
-		return characteristics.get();
-	}
-
-	public void setCharacteristics(String characteristics) {
-		this.characteristics.set(characteristics);
-	}
-
-	public StringProperty characteristicsProperty() {
-		return characteristics;
 	}
 
 	public int getDim() {
@@ -122,28 +68,52 @@ public class Variable {
 		return dim;
 	}
 
-	public String getExtensivity() {
-		return extensivity.get();
+	public int getIdExtensivity() {
+		return idExtensivity.get();
 	}
 
-	public void setExtensivity(String extensivity) {
-		this.extensivity.set(extensivity);
+	public void setExtensivity(int idExtensivity) {
+		this.idExtensivity.set(idExtensivity);
 	}
 
-	public StringProperty extensivityProperty() {
-		return extensivity;
+	public IntegerProperty idExtensivityProperty() {
+		return idExtensivity;
 	}
 
-	public String getContinuity() {
-		return extensivity.get();
+	public int getIdContinuity() {
+		return idContinuity.get();
 	}
 
-	public void setContinuity(String continuity) {
-		this.continuity.set(continuity);
+	public void setContinuity(int idContinuity) {
+		this.idContinuity.set(idContinuity);
 	}
 
-	public StringProperty continuityProperty() {
-		return continuity;
+	public IntegerProperty idContinuityProperty() {
+		return idContinuity;
+	}
+
+	public int getIdCharacteristics() {
+		return idCharacteristics.get();
+	}
+
+	public void setCharacteristics(int idCharacteristics) {
+		this.idCharacteristics.set(idCharacteristics);
+	}
+
+	public IntegerProperty idCharacteristicsProperty() {
+		return idCharacteristics;
+	}
+
+	public String getTitle() {
+		return title.get();
+	}
+
+	public void setTitle(String title) {
+		this.title.set(title);
+	}
+
+	public StringProperty titleProperty() {
+		return title;
 	}
 
 	public String getContent() {
@@ -158,32 +128,24 @@ public class Variable {
 		return content;
 	}
 
-	public LocalDate getSaved() {
-		return saved.get();
+	public int getIdLevel() {
+		return idLevel.get();
 	}
 
-	public void setSaved(LocalDate saved) {
-		this.saved.set(saved);
+	public void setIdLevel(int idLevel) {
+		this.idLevel.set(idLevel);
 	}
 
-	public int getIdLevelInt() {
-		return idLevelInt.get();
+	public Array getArrType() {
+		return arrType.get();
 	}
 
-	public void setIdLevelInt(int idLevelInt) {
-		this.idLevelInt.set(idLevelInt);
+	public void setType(Array arrType) {
+		this.arrType.set(arrType);
 	}
 
-	public ObjectProperty<LocalDate> savedProperty() {
-		return saved;
-	}
-
-	public String getListVar() {
-		return content.get();
-	}
-
-	public void setListVar(String content) {
-		this.content.set(content);
+	public ObjectProperty<Array> typeProperty() {
+		return arrType;
 	}
 
 }

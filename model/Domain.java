@@ -48,11 +48,11 @@ public class Domain {
 		return title;
 	}
 
-	public String getcontent() {
+	public String getContent() {
 		return content.get();
 	}
 
-	public void setcontent(String content) {
+	public void setContent(String content) {
 		this.content.set(content);
 	}
 

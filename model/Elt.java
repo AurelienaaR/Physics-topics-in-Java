@@ -1,14 +1,12 @@
 package model;
 
 import java.sql.Array;
-import java.time.LocalDate;
 
 public class Elt extends Variable {
 
-	public Elt(int id, String title, String domain, Array type, String characteristics, int dim, String extensivity,
-			String continuity, String content, int idLevelInt, LocalDate saved) {
-		super(id, title, domain, type, characteristics, dim, extensivity, continuity, content, idLevelInt, saved);
+	public Elt(int id, int dim, int idExtensivity, int idContinuity, int idCharacteristics, String title,
+			String content, int idLevel, Array arrType) {
+		super(id, dim, idExtensivity, idContinuity, idCharacteristics, title, content, idLevel, arrType);
 		// TODO Auto-generated constructor stub
 	}
-
 }
