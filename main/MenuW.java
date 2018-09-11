@@ -3,11 +3,9 @@ package main;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-// import javax.swing.JPanel;
 import main.WCreateElt;
 
 public class MenuW extends JMenu {
@@ -61,7 +59,7 @@ public class MenuW extends JMenu {
 					final int jj = ixEd;
 					subItemEdition.get(3 * ixEd + jSIEd).addActionListener(new ActionListener() {
 						public void actionPerformed(ActionEvent arg0) {
-							WCreateElt.WCreation(jj);
+							WCreateElt.WCreation(jj, 1);
 						}
 					});
 					break;

@@ -10,8 +10,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import model.Variable;
 
-public class Main extends JFrame { // implements ActionListener, ItemListener, ListSelectionListener {
-
+public class Main extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private WindowDialInfo wInfo = new WindowDialInfo();
 	public boolean sendData;

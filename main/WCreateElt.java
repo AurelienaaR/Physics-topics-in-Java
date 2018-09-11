@@ -12,9 +12,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
-
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
@@ -23,25 +23,20 @@ import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
-//import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
-// import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
-// import javax.swing.WindowConstants;
 import javax.swing.border.Border;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-
 import listeners.DimListener;
 import listeners.TypeListener;
-import model.Domain;
 import model.Topic;
 import model.Variable;
 
@@ -91,7 +86,6 @@ public class WCreateElt extends JFrame implements ActionListener, ItemListener, 
 			"2 - solutions - champ d'évolutions" };
 	int dimOK;
 	Object obj;
-	public String[] labelStr = { "domaine", "thèmes" };
 	String domainOK = "";
 	String contentOK = "";
 	String titleOK = "";
@@ -106,8 +100,7 @@ public class WCreateElt extends JFrame implements ActionListener, ItemListener, 
 	Array arrVarOK;
 	String arrVarStrOK = "";
 
-	public WCreateElt(final int iElt, final int idM) {
-
+	public WCreateElt(int iEltx, final int idM, int levelElt) {
 		JPanel panInt = new JPanel();
 		panInt.setSize(1400, 360);
 		JPanel panType = new JPanel();
@@ -163,10 +156,36 @@ public class WCreateElt extends JFrame implements ActionListener, ItemListener, 
 		JButton okBouton = new JButton("Enregistrer");
 		okBouton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+				String titlex = getTitle();
+				String contentx = getContent();
 				WindowDialInfo wInfo = new WindowDialInfo(getDomain(), (String) type.getSelectedItem(), getDim(),
-						getTitle(), getContent());
+						titlex, contentx);
 				wInfo.setVisible(false);
 				System.out.println(wInfo.toString());
+				switch (iEltx) {
+				case 0:
+					break;
+				case 1:
+					int idDomx = listDomain.getSelectedIndex();
+					int idTypex = type.getSelectedIndex();
+					ArrayList<Integer> arrVarx = new ArrayList<Integer>();
+					int sizex = listModelVisible.getSize();
+					for (int i = 0; i < sizex; i++) {
+						arrVarx.add(Connect.getIdByTitleVar(listModelVisible.elementAt(i)));
+					}
+					int idX = idM + 1;
+					System.out.println(arrVarx);
+					ArrayList<Topic> listTop = new ArrayList<Topic>();
+					if (titlex.matches("^[0-9.]+$") && idX > 0) {
+						listTop.add(new Topic(idX, idDomx, titlex, (Array) arrVarx, contentx, idTypex));
+						Connect.saveTopic(idX, idDomx, titlex, (Array) arrVarx, contentx, idTypex);
+					}
+					break;
+				case 2:
+					break;
+				default:
+					break;
+				}
 			}
 
 			public String getDim() {
@@ -201,34 +220,52 @@ public class WCreateElt extends JFrame implements ActionListener, ItemListener, 
 		JButton cancelBouton = new JButton("Annuler");
 		cancelBouton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				// setVisible(false);
+				switch (levelElt % 3) {
+				case 2:
+					WCreation(iEltx, levelElt - 1);
+					break;
+				case 3:
+					WCreation(iEltx, levelElt - 1);
+					break;
+				default:
+					WCreation(iEltx, 1);
+					break;
+				}
 			}
 		});
+
+		String labelButton = "Niveau ";
+		switch (levelElt % 3) {
+		case 1:
+			labelButton += "Théories et formulations";
+			break;
+		case 2:
+			labelButton += "Résultats et analyses";
+			break;
+		default:
+			labelButton += "Objets et variables étudiés";
+			break;
+		}
+		JButton levelSupButton = new JButton(labelButton);
+		levelSupButton.setVisible(false);
+		if (iEltx == 1) {
+			levelSupButton.setVisible(true);
+			levelSupButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent arg0) {
+					WCreation(iEltx, levelElt + 1);
+				}
+			});
+		}
 		control.add(okBouton);
 		control.add(cancelBouton);
+		control.add(levelSupButton);
 		panInt.add(content, BorderLayout.NORTH);
 		panInt.add(contentElt, BorderLayout.CENTER);
 		panInt.add(control, BorderLayout.WEST);
 		panInt.setVisible(true);
-		switch (iElt) {
-		case 0:
-			labelStr[0] = "domaine";
-			labelStr[1] = "thèmes";
-			break;
-		case 1:
-			labelStr[0] = "thème";
-			labelStr[1] = "variables";
-			break;
-		case 2:
-			labelStr[0] = "variable";
-			labelStr[1] = "types";
-			break;
-		default:
-			break;
-		}
 		domains.add("Tous domaines");
 		variables.add("Toutes variables du domaine");
-		variablesObj = Connect.connect();
+		variablesObj = Connect.initVariables();
 		JFrame globalW = new JFrame();
 		globalW.setSize(1400, 750);
 		globalW.add(panInt);
@@ -326,50 +363,13 @@ public class WCreateElt extends JFrame implements ActionListener, ItemListener, 
 		listVisible.addListSelectionListener(this);
 		listHidden.addListSelectionListener(this);
 		listDomain.addItemListener(this);
-		// globalW.setJMenuBar(wMenuBx);
 		globalW.setLocationRelativeTo(null);
 		globalW.add(contents);
 		globalW.setResizable(false);
 		globalW.setVisible(true);
-		System.out.println(idM);
-
-		if (titleOK != "") {
-
-			switch (iElt) {
-			case 0:
-				Domain objDomain = new Domain(idM, titleOK, contentOK);
-				ArrayList<Domain> listDom = new ArrayList<Domain>();
-				if (titleOK.matches("^[0-9.]+$")) {
-					listDom.add(objDomain);
-					Connect.saveDomain(idM, titleOK, contentOK);
-				}
-				break;
-			case 1:
-				Topic objTopic = new Topic(idM, idDomainOK, titleOK, arrVarOK, contentOK, idTypeOK);
-				ArrayList<Topic> listTop = new ArrayList<Topic>();
-				if (titleOK.matches("^[0-9.]+$")) {
-					listTop.add(objTopic);
-					Connect.saveTopic(idM, idDomainOK, titleOK, arrVarOK, contentOK, idTypeOK);
-				}
-				break;
-			case 2:
-				Variable objVariable = new Variable(idM, dimOK, idExtensivityOK, idContinuityOK, idCharacteristicsOK,
-						titleOK, contentOK, idLevelOK, arrTypeOK);
-				ArrayList<Variable> listVar = new ArrayList<Variable>();
-				if (titleOK.matches("^[0-9.]+$")) {
-					listVar.add(objVariable);
-					Connect.saveVariable(idM, dimOK, idExtensivityOK, idContinuityOK, idCharacteristicsOK, titleOK,
-							contentOK, idLevelOK, arrTypeOK);
-				}
-				break;
-			default:
-				break;
-			}
-		}
 	}
 
 	public void actionPerformed(ActionEvent e) {
-
 		Object source = e.getSource();
 		if (source == buttonAdd) {
 			try {
@@ -409,7 +409,6 @@ public class WCreateElt extends JFrame implements ActionListener, ItemListener, 
 		if (iSelected == -1) {
 			return;
 		}
-
 		String addedItem = listHidden.getSelectedValue();
 		listModelHidden.removeElementAt(iSelected);
 		displaySelectedItems();
@@ -418,7 +417,6 @@ public class WCreateElt extends JFrame implements ActionListener, ItemListener, 
 			listModelVisible.addElement(addedItem);
 			return;
 		}
-
 		for (int i = 0; i < size; i++) {
 			String item = listModelVisible.elementAt(i);
 			int compare = addedItem.compareToIgnoreCase(item);
@@ -427,9 +425,7 @@ public class WCreateElt extends JFrame implements ActionListener, ItemListener, 
 				return;
 			}
 		}
-
 		listModelVisible.addElement(addedItem);
-
 	}
 
 	public void addAllItems() {
@@ -450,15 +446,11 @@ public class WCreateElt extends JFrame implements ActionListener, ItemListener, 
 			return 1;
 		}
 		Object selectedDomain = listDomain.getSelectedItem();
-		// switch(iSelected) {}
 		domainChanged = (String) selectedDomain;
-
-		ArrayList<Topic> inTop = Connect.topic();
+		ArrayList<Topic> inTop = Connect.initTopic();
 		for (Topic topX : inTop) {
-			int iddomX = topX.getIddomain();
 			domX = topX.getTitle();
 			if (domains.contains(domX)) {
-				System.out.println("iddomX" + iddomX + " : " + domX);
 				domains.add(domX);
 			}
 		}
@@ -467,27 +459,21 @@ public class WCreateElt extends JFrame implements ActionListener, ItemListener, 
 	}
 
 	private void displaySelectedItems() throws SQLException {
-
 		String itemName;
 		List<Integer> listType;
 		int iLevPlus;
-		Variable eltSup;
-		ArrayList<Variable> listVar = Connect.connect(); // Elements.Element();
+		ArrayList<Variable> listVar = Connect.initVariables();
 		for (int k = 0; k < listVar.size(); k++) {
 			Array Arrx = listVar.get(k).getArrType();
 			Integer[] typex = (Integer[]) Arrx.getArray();
-			System.out.println(Arrays.toString(typex));
 			listType = Arrays.asList(typex);
 			for (int i = 0; i < typex.length; i++) {
 				iLevPlus = listType.get(i);
-				System.out.println("element " + i + " = " + iLevPlus);
 				if (iLevPlus < listVar.size()) {
-					eltSup = listVar.get(iLevPlus);
-					System.out.println(eltSup.toString());
+					// eltSup = listVar.get(iLevPlus);
 				}
 			}
 		}
-
 		int iSelected = listHidden.getSelectedIndex();
 		if (iSelected == -1) {
 			labelSelectedHidden.setText("");
@@ -498,29 +484,24 @@ public class WCreateElt extends JFrame implements ActionListener, ItemListener, 
 	}
 
 	private void initDomainModel() {
-		ArrayList<String> inDomT = Connect.domTot();
-		for (String domTX : inDomT) {
-			domains.add(domTX);
+		Hashtable<String, ArrayList<String>> inDomTot = Connect.domTotString();
+		for (String inDomX : inDomTot.get("title")) {
+			domains.add(inDomX);
 		}
 		Collections.sort(domains);
 		domains.forEach((String s) -> {
 			listModelDomain.addElement(s);
 		});
+
 		return;
 	}
 
 	private void initHiddenModel() {
 		listModelHidden.clear();
-		// if (!domainChanged.equals("Tous domaines")) {
-		// listModelVisible.clear();
-		// displaySelectedItems();
-		// return;
-		// }
 		Collections.sort(variables);
 		variables.forEach((String s) -> {
 			listModelHidden.addElement(s);
 		});
-
 	}
 
 	public void itemStateChanged(ItemEvent e) {
@@ -550,7 +531,6 @@ public class WCreateElt extends JFrame implements ActionListener, ItemListener, 
 			listModelHidden.addElement(removedItem);
 			return;
 		}
-
 		for (int i = 0; i < size; i++) {
 			String item = listModelHidden.elementAt(i);
 			int compare = removedItem.compareToIgnoreCase(item);
@@ -567,7 +547,6 @@ public class WCreateElt extends JFrame implements ActionListener, ItemListener, 
 		initHiddenModel();
 		listModelVisible.clear();
 		displaySelectedItems();
-
 	}
 
 	private void setSpecificSize(JComponent component, Dimension dimension) {
@@ -587,7 +566,6 @@ public class WCreateElt extends JFrame implements ActionListener, ItemListener, 
 			}
 		}
 		if (source == listVisible) {
-			// changeImage();
 			try {
 				displaySelectedItems();
 			} catch (SQLException e1) {
@@ -598,26 +576,15 @@ public class WCreateElt extends JFrame implements ActionListener, ItemListener, 
 		return;
 	}
 
-	public void createTopic(int id, int iddomain, String title, Array arrVar, String content, int idType) {
-		ArrayList<Topic> listTop = new ArrayList<Topic>();
-		if (title.matches("^[0-9.]+$")) {
-			listTop.add(new Topic(id, iddomain, title, arrVar, content, idType));
-		}
-	}
-
 	public WindowDialInfo showWindowDial() {
 		this.sendData = false;
 		this.setVisible(true);
 		return this.wInfo;
 	}
 
-	public static void WCreation(final int iElt) {
-		final String eltStr = Elements[iElt];
-		System.out.println(eltStr);
-		final int idM = 1 + Connect.idMaxi(iElt);
-		WCreateElt wtop = new WCreateElt(iElt, idM);
-		
-		
+	public static void WCreation(final int iEt, int level) {
+		final int idM = 1 + Connect.idMaxi(iEt);
+		WCreateElt wtop = new WCreateElt(iEt, idM, level);
 		wtop.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 }

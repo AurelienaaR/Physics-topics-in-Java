@@ -7,16 +7,18 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
+
 import constantes.mdp;
+import model.Domain;
 import model.Topic;
 import model.Variable;
 
 public class Connect {
-
 	public static int idMaxi(int iElt) {
 		int idMax = 0;
-		String EltStr = "domain";
+		String EltStr = "";
 		String query;
 		int idX = 0;
 		switch (iElt) {
@@ -30,6 +32,7 @@ public class Connect {
 			EltStr = "variables";
 			break;
 		default:
+			EltStr = "topic";
 			break;
 		}
 		try {
@@ -55,7 +58,95 @@ public class Connect {
 		return idMax;
 	}
 
-	public static ArrayList<Variable> connect() {
+	public static ArrayList<Domain> initDomain() {
+		int idMDom = idMaxi(0);
+		String titleStr;
+		String contentStr;
+		ArrayList<Domain> domainObj = new ArrayList<Domain>();
+		// ArrayList<String> cadres = new ArrayList<String>();
+		List<String> query = new ArrayList<String>();
+		try {
+			Class.forName("org.postgresql.Driver");
+			String url = "jdbc:postgresql://localhost:5432/physvar";
+			String user = "postgres";
+			String passwd = mdp.mdp;
+			Connection conn = DriverManager.getConnection(url, user, passwd);
+			Statement state = conn.createStatement();
+			for (int iDom = 1; iDom <= idMDom; iDom++) {
+				query.add("SELECT * FROM domain WHERE id = " + iDom);
+				ResultSet resDom = state.executeQuery(query.get(iDom - 1));
+				ResultSetMetaData resDo = resDom.getMetaData();
+				for (int j = 1; j <= resDo.getColumnCount(); j++) {
+					resDo.getColumnName(j).toUpperCase();
+				}
+				while (resDom.next()) {
+					titleStr = resDom.getString("title");
+					contentStr = resDom.getString("content");
+					domainObj.add(new Domain(iDom, titleStr, contentStr));
+				}
+				resDom.close();
+			}
+			state.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return domainObj;
+	}
+
+	public static ArrayList<Topic> initTopic() {
+		int iddomain;
+		int idType;
+		int idMTop = idMaxi(1);
+		String titleStr;
+		String contentStr;
+		Array varArr;
+		ArrayList<Topic> topicObj = new ArrayList<Topic>();
+		// ArrayList<String> cadres = new ArrayList<String>();
+		List<String> query = new ArrayList<String>();
+		try {
+			Class.forName("org.postgresql.Driver");
+			String url = "jdbc:postgresql://localhost:5432/physvar";
+			String user = "postgres";
+			String passwd = mdp.mdp;
+			Connection conn = DriverManager.getConnection(url, user, passwd);
+			Statement state = conn.createStatement();
+			for (int iTop = 1; iTop <= idMTop; iTop++) {
+				query.add("SELECT * FROM topic t WHERE t.id = " + iTop);
+				ResultSet resTop = state.executeQuery(query.get(iTop - 1));
+				ResultSetMetaData resTo = resTop.getMetaData();
+				for (int j = 1; j <= resTo.getColumnCount(); j++) {
+					resTo.getColumnName(j).toUpperCase();
+				}
+				while (resTop.next()) {
+					titleStr = resTop.getString("title");
+					contentStr = resTop.getString("content");
+					varArr = resTop.getArray("arrvar");
+					idType = resTop.getInt("idtype");
+					iddomain = resTop.getInt("iddomain");
+					topicObj.add(new Topic(iTop, iddomain, titleStr, varArr, contentStr, idType));
+				}
+				resTop.close();
+			}
+			// ResultSet resCadre = state.executeQuery("SELECT content FROM cadre");
+			// ResultSetMetaData resCa = resCadre.getMetaData();
+			// for (int ji = 1; ji <= resCa.getColumnCount(); ji++) {
+			// resCa.getColumnName(ji).toUpperCase();
+			// }
+			// while (resCadre.next()) {
+			// for (int k = 1; k <= resCa.getColumnCount(); k++) {
+			// caStr = resCadre.getObject(k).toString();
+			// cadres.add(caStr);
+			// }
+			// }
+			// resCadre.close();
+			state.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return topicObj;
+	}
+
+	public static ArrayList<Variable> initVariables() {
 		String caStr = "";
 		String exStr = "";
 		String idElt = "1";
@@ -65,8 +156,8 @@ public class Connect {
 		ArrayList<String> levels = new ArrayList<String>();
 		ArrayList<String> cadres = new ArrayList<String>();
 		ArrayList<String> extensivities = new ArrayList<String>();
-		String titleStr;
-		String contentStr;
+		String titleStr = "";
+		String contentStr = "";
 		int idCharacteristics;
 		Array arrType;
 		int dimInt;
@@ -146,89 +237,6 @@ public class Connect {
 		return variablesObj;
 	}
 
-	public static ArrayList<Topic> topic() {
-		int iddomain;
-		int idType;
-		int idMTop = idMaxi(1);
-		String caStr = "";
-		String exStr = "";
-		String idElt = "1";
-		String levStr = "";
-		String titleStr;
-		String contentStr;
-		Array varArr;
-		ArrayList<Topic> topicObj = new ArrayList<Topic>();
-		ArrayList<String> levels = new ArrayList<String>();
-		ArrayList<String> cadres = new ArrayList<String>();
-		ArrayList<String> extensivities = new ArrayList<String>();
-		List<String> query = new ArrayList<String>();
-		try {
-			Class.forName("org.postgresql.Driver");
-			String url = "jdbc:postgresql://localhost:5432/physvar";
-			String user = "postgres";
-			String passwd = mdp.mdp;
-			Connection conn = DriverManager.getConnection(url, user, passwd);
-			Statement state = conn.createStatement();
-			for (int iTop = 1; iTop <= idMTop; iTop++) {
-				query.add("SELECT * FROM topic t WHERE t.id = " + iTop);
-				ResultSet resTop = state.executeQuery(query.get(iTop - 1));
-				ResultSetMetaData resTo = resTop.getMetaData();
-				for (int j = 1; j <= resTo.getColumnCount(); j++) {
-					resTo.getColumnName(j).toUpperCase();
-				}
-				while (resTop.next()) {
-					titleStr = resTop.getString("title");
-					contentStr = resTop.getString("content");
-					varArr = resTop.getArray("arrvar");
-					idType = resTop.getInt("idtype");
-					iddomain = resTop.getInt("iddomain");
-					topicObj.add(new Topic(iTop, iddomain, titleStr, varArr, contentStr, idType));
-				}
-				resTop.close();
-			}
-			ResultSet resCadre = state.executeQuery("SELECT content FROM cadre");
-			ResultSetMetaData resCa = resCadre.getMetaData();
-			for (int ji = 1; ji <= resCa.getColumnCount(); ji++) {
-				resCa.getColumnName(ji).toUpperCase();
-			}
-			while (resCadre.next()) {
-				for (int k = 1; k <= resCa.getColumnCount(); k++) {
-					caStr = resCadre.getObject(k).toString();
-					cadres.add(caStr);
-				}
-			}
-			resCadre.close();
-			ResultSet resExtensivity = state.executeQuery("SELECT content FROM extensivity");
-			ResultSetMetaData resEx = resExtensivity.getMetaData();
-			for (int l = 1; l <= resEx.getColumnCount(); l++) {
-				resEx.getColumnName(l).toUpperCase();
-			}
-			while (resExtensivity.next()) {
-				for (int m = 1; m <= resEx.getColumnCount(); m++) {
-					exStr = resExtensivity.getObject(m).toString();
-					extensivities.add(exStr);
-				}
-			}
-			resExtensivity.close();
-			ResultSet resLevels = state.executeQuery("SELECT title FROM variables where id = " + idElt);
-			ResultSetMetaData resLev = resLevels.getMetaData();
-			for (int n = 1; n <= resLev.getColumnCount(); n++) {
-				resLev.getColumnName(n).toUpperCase();
-			}
-			while (resLevels.next()) {
-				for (int o = 1; o <= resLev.getColumnCount(); o++) {
-					levStr = resLevels.getObject(o).toString();
-					levels.add(levStr);
-				}
-			}
-			resLevels.close();
-			state.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return topicObj;
-	}
-
 	public static ArrayList<String> domTot() {
 		String[] domStrT = { "Tous domaines", "Tous domaines" };
 		ArrayList<String> domTot = new ArrayList<String>();
@@ -258,36 +266,257 @@ public class Connect {
 		return domTot;
 	}
 
-	public static String[] domString(int idDomain) {
-		List<String> query = new ArrayList<String>();
-		String titleStr = "";
-		String contentStr = "";
-		String[] domStr = {};
+	public static int getIdByTitleVar(String titlex) {
+		Hashtable<String, ArrayList<String>> htVarx = varTotString();
+		ArrayList<String> titles = htVarx.get("title");
+		int idVar = 1 + titles.indexOf(titlex);
+		return idVar;
+	}
+
+	public static Hashtable<String, ArrayList<String>> domString(int idDomain) {
+		Hashtable<String, ArrayList<String>> hidDom = new Hashtable<String, ArrayList<String>>();
 		try {
+			String colX;
 			Class.forName("org.postgresql.Driver");
 			String url = "jdbc:postgresql://localhost:5432/physvar";
 			String user = "postgres";
 			String passwd = mdp.mdp;
 			Connection conn = DriverManager.getConnection(url, user, passwd);
 			Statement state = conn.createStatement();
-			query.add("SELECT * FROM domain WHERE id = " + idDomain);
-			ResultSet resDom = state.executeQuery(query.get(idDomain - 1));
+			String query = "SELECT * FROM domain WHERE id = " + idDomain;
+			ResultSet resDom = state.executeQuery(query);
 			ResultSetMetaData resDo = resDom.getMetaData();
-			for (int j = 1; j <= resDo.getColumnCount(); j++) {
-				resDo.getColumnName(j).toUpperCase();
-			}
-			while (resDom.next()) {
-				titleStr = resDom.getString("title");
-				contentStr = resDom.getString("content");
-				domStr[0] = titleStr;
-				domStr[1] = contentStr;
+			int jMaxi = resDo.getColumnCount();
+			ArrayList<String> colDom = new ArrayList<String>();
+			for (int jIni = 1; jIni <= jMaxi; jIni++) {
+				colDom.add(resDo.getColumnName(jIni));
 			}
 			resDom.close();
 			state.close();
+			Statement statex = conn.createStatement();
+			for (int j = 0; j < jMaxi; j++) {
+				ArrayList<String> hidDomX = new ArrayList<String>();
+				colX = colDom.get(j);
+				ResultSet resDomx = statex.executeQuery(query);
+				ResultSetMetaData resDox = resDomx.getMetaData();
+				while (resDomx.next()) {
+					if (resDox.getColumnName(j + 1).equals(colX)) {
+						hidDomX.add(resDomx.getString(colX));
+					}
+				}
+				hidDom.put(colX, hidDomX);
+				resDomx.close();
+			}
+			statex.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return domStr;
+		return hidDom;
+	}
+
+	public static Hashtable<String, ArrayList<String>> domTotString() {
+		Hashtable<String, ArrayList<String>> htDom = new Hashtable<String, ArrayList<String>>();
+		try {
+			String colX;
+			Class.forName("org.postgresql.Driver");
+			String url = "jdbc:postgresql://localhost:5432/physvar";
+			String user = "postgres";
+			String passwd = mdp.mdp;
+			Connection conn = DriverManager.getConnection(url, user, passwd);
+			Statement state = conn.createStatement();
+			String query = "SELECT * FROM domain";
+			ResultSet resDom = state.executeQuery(query);
+			ResultSetMetaData resDo = resDom.getMetaData();
+			int jMaxi = resDo.getColumnCount();
+			ArrayList<String> colDom = new ArrayList<String>();
+			for (int jIni = 1; jIni <= jMaxi; jIni++) {
+				colDom.add(resDo.getColumnName(jIni));
+			}
+			resDom.close();
+			state.close();
+			Statement statex = conn.createStatement();
+			for (int j = 0; j < jMaxi; j++) {
+				ArrayList<String> htDomX = new ArrayList<String>();
+				colX = colDom.get(j);
+				ResultSet resDomx = statex.executeQuery(query);
+				ResultSetMetaData resDox = resDomx.getMetaData();
+				while (resDomx.next()) {
+					if (resDox.getColumnName(j + 1).equals(colX)) {
+						htDomX.add(resDomx.getString(colX));
+					}
+				}
+				htDom.put(colX, htDomX);
+				resDomx.close();
+			}
+			statex.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return htDom;
+	}
+
+	public static Hashtable<String, ArrayList<String>> topString(int idTopic) {
+		Hashtable<String, ArrayList<String>> hidTop = new Hashtable<String, ArrayList<String>>();
+		try {
+			String colX;
+			Class.forName("org.postgresql.Driver");
+			String url = "jdbc:postgresql://localhost:5432/physvar";
+			String user = "postgres";
+			String passwd = mdp.mdp;
+			Connection conn = DriverManager.getConnection(url, user, passwd);
+			Statement state = conn.createStatement();
+			String query = "SELECT * FROM topic WHERE id = " + idTopic;
+			ResultSet resTop = state.executeQuery(query);
+			ResultSetMetaData resTo = resTop.getMetaData();
+			int jMaxi = resTo.getColumnCount();
+			ArrayList<String> colTop = new ArrayList<String>();
+			for (int jIni = 1; jIni <= jMaxi; jIni++) {
+				colTop.add(resTo.getColumnName(jIni));
+			}
+			resTop.close();
+			state.close();
+			Statement statex = conn.createStatement();
+			for (int j = 0; j < jMaxi; j++) {
+				ArrayList<String> hidTopX = new ArrayList<String>();
+				colX = colTop.get(j);
+				ResultSet resTopx = statex.executeQuery(query);
+				ResultSetMetaData resTox = resTopx.getMetaData();
+				while (resTopx.next()) {
+					if (resTox.getColumnName(j + 1).equals(colX)) {
+						hidTopX.add(resTopx.getString(colX));
+					}
+				}
+				hidTop.put(colX, hidTopX);
+				resTopx.close();
+			}
+			statex.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return hidTop;
+	}
+
+	public static Hashtable<String, ArrayList<String>> topTotString() {
+		Hashtable<String, ArrayList<String>> htTop = new Hashtable<String, ArrayList<String>>();
+		try {
+			String colX;
+			Class.forName("org.postgresql.Driver");
+			String url = "jdbc:postgresql://localhost:5432/physvar";
+			String user = "postgres";
+			String passwd = mdp.mdp;
+			Connection conn = DriverManager.getConnection(url, user, passwd);
+			Statement state = conn.createStatement();
+			String query = "SELECT * FROM topic";
+			ResultSet resTop = state.executeQuery(query);
+			ResultSetMetaData resTo = resTop.getMetaData();
+			int jMaxi = resTo.getColumnCount();
+			ArrayList<String> colTop = new ArrayList<String>();
+			for (int jIni = 1; jIni <= jMaxi; jIni++) {
+				colTop.add(resTo.getColumnName(jIni));
+			}
+			resTop.close();
+			state.close();
+			Statement statex = conn.createStatement();
+			for (int j = 0; j < jMaxi; j++) {
+				ArrayList<String> htTopX = new ArrayList<String>();
+				colX = colTop.get(j);
+				ResultSet resTopx = statex.executeQuery(query);
+				ResultSetMetaData resTox = resTopx.getMetaData();
+				while (resTopx.next()) {
+					if (resTox.getColumnName(j + 1).equals(colX)) {
+						htTopX.add(resTopx.getString(colX));
+					}
+				}
+				htTop.put(colX, htTopX);
+				resTopx.close();
+			}
+			statex.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return htTop;
+	}
+
+	public static Hashtable<String, ArrayList<String>> varString(int idVar) {
+		Hashtable<String, ArrayList<String>> hidVar = new Hashtable<String, ArrayList<String>>();
+		try {
+			String colX;
+			Class.forName("org.postgresql.Driver");
+			String url = "jdbc:postgresql://localhost:5432/physvar";
+			String user = "postgres";
+			String passwd = mdp.mdp;
+			Connection conn = DriverManager.getConnection(url, user, passwd);
+			Statement state = conn.createStatement();
+			String query = "SELECT * FROM variables WHERE id = " + idVar;
+			ResultSet resVar = state.executeQuery(query);
+			ResultSetMetaData resTo = resVar.getMetaData();
+			int jMaxi = resTo.getColumnCount();
+			ArrayList<String> colVar = new ArrayList<String>();
+			for (int jIni = 1; jIni <= jMaxi; jIni++) {
+				colVar.add(resTo.getColumnName(jIni));
+			}
+			resVar.close();
+			state.close();
+			Statement statex = conn.createStatement();
+			for (int j = 0; j < jMaxi; j++) {
+				ArrayList<String> hidVarX = new ArrayList<String>();
+				colX = colVar.get(j);
+				ResultSet resVarx = statex.executeQuery(query);
+				ResultSetMetaData resTox = resVarx.getMetaData();
+				while (resVarx.next()) {
+					if (resTox.getColumnName(j + 1).equals(colX)) {
+						hidVarX.add(resVarx.getString(colX));
+					}
+				}
+				hidVar.put(colX, hidVarX);
+				resVarx.close();
+			}
+			statex.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return hidVar;
+	}
+
+	public static Hashtable<String, ArrayList<String>> varTotString() {
+		Hashtable<String, ArrayList<String>> htVar = new Hashtable<String, ArrayList<String>>();
+		try {
+			String colX;
+			Class.forName("org.postgresql.Driver");
+			String url = "jdbc:postgresql://localhost:5432/physvar";
+			String user = "postgres";
+			String passwd = mdp.mdp;
+			Connection conn = DriverManager.getConnection(url, user, passwd);
+			Statement state = conn.createStatement();
+			String query = "SELECT * FROM variables";
+			ResultSet resVar = state.executeQuery(query);
+			ResultSetMetaData resVa = resVar.getMetaData();
+			int jMaxi = resVa.getColumnCount();
+			ArrayList<String> colVar = new ArrayList<String>();
+			for (int jIni = 1; jIni <= jMaxi; jIni++) {
+				colVar.add(resVa.getColumnName(jIni));
+			}
+			resVar.close();
+			state.close();
+			Statement statex = conn.createStatement();
+			for (int j = 0; j < jMaxi; j++) {
+				ArrayList<String> htVarX = new ArrayList<String>();
+				colX = colVar.get(j);
+				ResultSet resVarx = statex.executeQuery(query);
+				ResultSetMetaData resVax = resVarx.getMetaData();
+				while (resVarx.next()) {
+					if (resVax.getColumnName(j + 1).equals(colX)) {
+						htVarX.add(resVarx.getString(colX));
+					}
+				}
+				htVar.put(colX, htVarX);
+				resVarx.close();
+			}
+			statex.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return htVar;
 	}
 
 	public static String[] extString(int idExt) {
@@ -386,7 +615,7 @@ public class Connect {
 			String passwd = mdp.mdp;
 			Connection conn = DriverManager.getConnection(url, user, passwd);
 			Statement state = conn.createStatement();
-			query.add("SELECT * FROM characteristics WHERE id = " + idLev);
+			query.add("SELECT * FROM level WHERE id = " + idLev);
 			ResultSet resLev = state.executeQuery(query.get(idLev - 1));
 			while (resLev.next()) {
 				titleStr = resLev.getString("title");
