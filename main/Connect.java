@@ -9,9 +9,10 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
-
 import constantes.mdp;
+import model.Cadre;
 import model.Domain;
+import model.Subvariable;
 import model.Topic;
 import model.Variable;
 
@@ -30,6 +31,9 @@ public class Connect {
 			break;
 		case 2:
 			EltStr = "variables";
+			break;
+		case 3:
+			EltStr = "subvariables";
 			break;
 		default:
 			EltStr = "topic";
@@ -58,12 +62,51 @@ public class Connect {
 		return idMax;
 	}
 
+	public static ArrayList<Cadre> initCadre() {
+		int idMCad = 1;
+		String titleStr;
+		String contentStr;
+		ArrayList<Cadre> cadreObj = new ArrayList<Cadre>();
+		List<String> query = new ArrayList<String>();
+		try {
+			Class.forName("org.postgresql.Driver");
+			String url = "jdbc:postgresql://localhost:5432/physvar";
+			String user = "postgres";
+			String passwd = mdp.mdp;
+			Connection conn = DriverManager.getConnection(url, user, passwd);
+			Statement state = conn.createStatement();
+			for (int iCad = 1; iCad <= idMCad; iCad++) {
+				query.add("SELECT * FROM cadre WHERE id = " + iCad);
+				ResultSet resCad = state.executeQuery(query.get(iCad - 1));
+				ResultSetMetaData resDo = resCad.getMetaData();
+				for (int j = 1; j <= resDo.getColumnCount(); j++) {
+					resDo.getColumnName(j).toUpperCase();
+				}
+				while (resCad.next()) {
+					iCad = resCad.getInt("id");
+					titleStr = resCad.getString("title");
+					contentStr = resCad.getString("content");
+					cadreObj.add(new Cadre(iCad, titleStr, contentStr));
+				}
+				resCad.close();
+			}
+			state.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return cadreObj;
+	}
+
 	public static ArrayList<Domain> initDomain() {
 		int idMDom = idMaxi(0);
 		String titleStr;
 		String contentStr;
+		int iCad = 1;
+		int iTyp = 1;
+		String titleCadStr;
+		String contentCadStr;
 		ArrayList<Domain> domainObj = new ArrayList<Domain>();
-		// ArrayList<String> cadres = new ArrayList<String>();
+		ArrayList<Cadre> cadreObj = new ArrayList<Cadre>();
 		List<String> query = new ArrayList<String>();
 		try {
 			Class.forName("org.postgresql.Driver");
@@ -80,11 +123,26 @@ public class Connect {
 					resDo.getColumnName(j).toUpperCase();
 				}
 				while (resDom.next()) {
+					iCad = resDom.getInt("idcadre");
+					iTyp = resDom.getInt("idtype");
 					titleStr = resDom.getString("title");
 					contentStr = resDom.getString("content");
-					domainObj.add(new Domain(iDom, titleStr, contentStr));
+					domainObj.add(new Domain(iDom, iCad, iTyp, titleStr, contentStr));
 				}
 				resDom.close();
+
+				ResultSet resCad = state.executeQuery("SELECT * FROM cadre WHERE id = " + iCad);
+				ResultSetMetaData resCa = resCad.getMetaData();
+				for (int j = 1; j <= resCa.getColumnCount(); j++) {
+					resCa.getColumnName(j).toUpperCase();
+				}
+				while (resCad.next()) {
+					iCad = resCad.getInt("id");
+					titleCadStr = resCad.getString("title");
+					contentCadStr = resCad.getString("content");
+					cadreObj.add(new Cadre(iCad, titleCadStr, contentCadStr));
+				}
+				resCad.close();
 			}
 			state.close();
 		} catch (Exception e) {
@@ -94,14 +152,13 @@ public class Connect {
 	}
 
 	public static ArrayList<Topic> initTopic() {
-		int iddomain;
+		int idDomain;
 		int idType;
 		int idMTop = idMaxi(1);
 		String titleStr;
 		String contentStr;
 		Array varArr;
 		ArrayList<Topic> topicObj = new ArrayList<Topic>();
-		// ArrayList<String> cadres = new ArrayList<String>();
 		List<String> query = new ArrayList<String>();
 		try {
 			Class.forName("org.postgresql.Driver");
@@ -122,23 +179,11 @@ public class Connect {
 					contentStr = resTop.getString("content");
 					varArr = resTop.getArray("arrvar");
 					idType = resTop.getInt("idtype");
-					iddomain = resTop.getInt("iddomain");
-					topicObj.add(new Topic(iTop, iddomain, titleStr, varArr, contentStr, idType));
+					idDomain = resTop.getInt("iddomain");
+					topicObj.add(new Topic(iTop, idDomain, titleStr, varArr, contentStr, idType));
 				}
 				resTop.close();
 			}
-			// ResultSet resCadre = state.executeQuery("SELECT content FROM cadre");
-			// ResultSetMetaData resCa = resCadre.getMetaData();
-			// for (int ji = 1; ji <= resCa.getColumnCount(); ji++) {
-			// resCa.getColumnName(ji).toUpperCase();
-			// }
-			// while (resCadre.next()) {
-			// for (int k = 1; k <= resCa.getColumnCount(); k++) {
-			// caStr = resCadre.getObject(k).toString();
-			// cadres.add(caStr);
-			// }
-			// }
-			// resCadre.close();
 			state.close();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -147,14 +192,12 @@ public class Connect {
 	}
 
 	public static ArrayList<Variable> initVariables() {
-		String caStr = "";
 		String exStr = "";
 		String idElt = "1";
 		String levStr = "";
 		List<String> query = new ArrayList<String>();
 		ArrayList<Variable> variablesObj = new ArrayList<Variable>();
 		ArrayList<String> levels = new ArrayList<String>();
-		ArrayList<String> cadres = new ArrayList<String>();
 		ArrayList<String> extensivities = new ArrayList<String>();
 		String titleStr = "";
 		String contentStr = "";
@@ -194,18 +237,6 @@ public class Connect {
 				}
 				resVar.close();
 			}
-			ResultSet resCadre = state.executeQuery("SELECT content FROM cadre");
-			ResultSetMetaData resCa = resCadre.getMetaData();
-			for (int ji = 1; ji <= resCa.getColumnCount(); ji++) {
-				resCa.getColumnName(ji).toUpperCase();
-			}
-			while (resCadre.next()) {
-				for (int k = 1; k <= resCa.getColumnCount(); k++) {
-					caStr = resCadre.getObject(k).toString();
-					cadres.add(caStr);
-				}
-			}
-			resCadre.close();
 			ResultSet resExtensivity = state.executeQuery("SELECT content FROM extensivity");
 			ResultSetMetaData resEx = resExtensivity.getMetaData();
 			for (int l = 1; l <= resEx.getColumnCount(); l++) {
@@ -235,6 +266,124 @@ public class Connect {
 			e.printStackTrace();
 		}
 		return variablesObj;
+	}
+
+	public static ArrayList<Subvariable> initSubVariables() {
+		String exStr = "";
+		String idElt = "1";
+		String levStr = "";
+		List<String> query = new ArrayList<String>();
+		ArrayList<Subvariable> subVariablesObj = new ArrayList<Subvariable>();
+		ArrayList<String> levels = new ArrayList<String>();
+		ArrayList<String> extensivities = new ArrayList<String>();
+		String titleStr = "";
+		String contentStr = "";
+		int idCharacteristics;
+		Array arrType;
+		int dimInt;
+		int idExtensivity;
+		int idContinuity;
+		int idLevel;
+		int idMVar = idMaxi(3);
+		try {
+			Class.forName("org.postgresql.Driver");
+			String url = "jdbc:postgresql://localhost:5432/physvar";
+			String user = "postgres";
+			String passwd = mdp.mdp;
+			Connection conn = DriverManager.getConnection(url, user, passwd);
+			Statement state = conn.createStatement();
+			for (int i = 1; i <= idMVar; i++) {
+				query.add("SELECT * FROM subvariables sv WHERE sv.id = " + i);
+				ResultSet resSubVar = state.executeQuery(query.get(i - 1));
+				ResultSetMetaData resSubVa = resSubVar.getMetaData();
+				for (int j = 1; j <= resSubVa.getColumnCount(); j++) {
+					resSubVa.getColumnName(j).toUpperCase();
+				}
+				while (resSubVar.next()) {
+					titleStr = resSubVar.getString("title");
+					contentStr = resSubVar.getString("content");
+					levStr = resSubVar.getString("idlevel");
+					arrType = resSubVar.getArray("arrtype");
+					idCharacteristics = resSubVar.getInt("idcharacteristics");
+					dimInt = resSubVar.getInt("dim");
+					idExtensivity = resSubVar.getInt("idextensivity");
+					idContinuity = resSubVar.getInt("idcontinuity");
+					idLevel = resSubVar.getInt("idlevel");
+					subVariablesObj.add(new Subvariable(i, dimInt, idExtensivity, idContinuity, idCharacteristics,
+							titleStr, contentStr, idLevel, arrType));
+				}
+				resSubVar.close();
+			}
+			ResultSet resExtensivity = state.executeQuery("SELECT content FROM extensivity");
+			ResultSetMetaData resEx = resExtensivity.getMetaData();
+			for (int l = 1; l <= resEx.getColumnCount(); l++) {
+				resEx.getColumnName(l).toUpperCase();
+			}
+			while (resExtensivity.next()) {
+				for (int m = 1; m <= resEx.getColumnCount(); m++) {
+					exStr = resExtensivity.getObject(m).toString();
+					extensivities.add(exStr);
+				}
+			}
+			resExtensivity.close();
+			ResultSet resLevels = state.executeQuery("SELECT title FROM variables where id = " + idElt);
+			ResultSetMetaData resLev = resLevels.getMetaData();
+			for (int n = 1; n <= resLev.getColumnCount(); n++) {
+				resLev.getColumnName(n).toUpperCase();
+			}
+			while (resLevels.next()) {
+				for (int o = 1; o <= resLev.getColumnCount(); o++) {
+					levStr = resLevels.getObject(o).toString();
+					levels.add(levStr);
+				}
+			}
+			resExtensivity.close();
+			state.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return subVariablesObj;
+	}
+
+	public static Hashtable<String, ArrayList<String>> cadTotString() {
+		Hashtable<String, ArrayList<String>> htCad = new Hashtable<String, ArrayList<String>>();
+		try {
+			String colX;
+			Class.forName("org.postgresql.Driver");
+			String url = "jdbc:postgresql://localhost:5432/physvar";
+			String user = "postgres";
+			String passwd = mdp.mdp;
+			Connection conn = DriverManager.getConnection(url, user, passwd);
+			Statement state = conn.createStatement();
+			String query = "SELECT * FROM cadre";
+			ResultSet resCad = state.executeQuery(query);
+			ResultSetMetaData resCa = resCad.getMetaData();
+			int jMaxi = resCa.getColumnCount();
+			ArrayList<String> colCad = new ArrayList<String>();
+			for (int jIni = 1; jIni <= jMaxi; jIni++) {
+				colCad.add(resCa.getColumnName(jIni));
+			}
+			resCad.close();
+			state.close();
+			Statement statex = conn.createStatement();
+			for (int j = 0; j < jMaxi; j++) {
+				ArrayList<String> htCadX = new ArrayList<String>();
+				colX = colCad.get(j);
+				ResultSet resCadx = statex.executeQuery(query);
+				ResultSetMetaData resCax = resCadx.getMetaData();
+				while (resCadx.next()) {
+					if (resCax.getColumnName(j + 1).equals(colX)) {
+						htCadX.add(resCadx.getString(colX));
+					}
+				}
+				htCad.put(colX, htCadX);
+				resCadx.close();
+			}
+			statex.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return htCad;
 	}
 
 	public static ArrayList<String> domTot() {
@@ -462,9 +611,9 @@ public class Connect {
 				ArrayList<String> hidVarX = new ArrayList<String>();
 				colX = colVar.get(j);
 				ResultSet resVarx = statex.executeQuery(query);
-				ResultSetMetaData resTox = resVarx.getMetaData();
+				ResultSetMetaData resVax = resVarx.getMetaData();
 				while (resVarx.next()) {
-					if (resTox.getColumnName(j + 1).equals(colX)) {
+					if (resVax.getColumnName(j + 1).equals(colX)) {
 						hidVarX.add(resVarx.getString(colX));
 					}
 				}
@@ -631,7 +780,7 @@ public class Connect {
 		return levStr;
 	}
 
-	public static void saveDomain(int idMaxPlus, String titleStr, String contentStr) {
+	public static void saveDomain(int idMaxPlus, int idcadre, int idtype, String titleStr, String contentStr) {
 		try {
 			Class.forName("org.postgresql.Driver");
 			String url = "jdbc:postgresql://localhost:5432/physvar";
@@ -639,8 +788,8 @@ public class Connect {
 			String passwd = mdp.mdp;
 			Connection conn = DriverManager.getConnection(url, user, passwd);
 			Statement state = conn.createStatement();
-			String querySaveDomain = "INSERT INTO domain ('id', 'title', 'content') VALUES (" + idMaxPlus + ", "
-					+ titleStr + ", " + contentStr + ");";
+			String querySaveDomain = "INSERT INTO domain ('id', 'idcadre', 'idtype', 'title', 'content') VALUES ("
+					+ idMaxPlus + ", " + idcadre + ", " + idtype + ", " + titleStr + ", " + contentStr + ");";
 			ResultSet resSDomain = state.executeQuery(querySaveDomain);
 			resSDomain.close();
 		} catch (Exception e) {
