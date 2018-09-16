@@ -1,7 +1,6 @@
 package model;
 
-import java.sql.Array;
-
+import java.util.ArrayList;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -14,10 +13,9 @@ public class Topic {
 	private final IntegerProperty id;
 	private final IntegerProperty iddomain;
 	private final StringProperty title;
-	private final ObjectProperty<Array> arrvar;
+	private final ObjectProperty<ArrayList<Integer>> arrvar;
 	private final StringProperty content;
 	private final IntegerProperty idtype;
-
 
 	/**
 	 * Constructor
@@ -31,11 +29,11 @@ public class Topic {
 	 * 
 	 */
 
-	public Topic(int id, int iddomain, String title, Array arrvar, String content, int idtype) {
+	public Topic(int id, int iddomain, String title, ArrayList<Integer> arrvar, String content, int idtype) {
 		this.id = new SimpleIntegerProperty(id);
 		this.iddomain = new SimpleIntegerProperty(iddomain);
 		this.title = new SimpleStringProperty(title);
-		this.arrvar = new SimpleObjectProperty<Array>(arrvar);
+		this.arrvar = new SimpleObjectProperty<ArrayList<Integer>>();
 		this.content = new SimpleStringProperty(content);
 		this.idtype = new SimpleIntegerProperty(idtype);
 	}
@@ -76,15 +74,15 @@ public class Topic {
 		return title;
 	}
 
-	public Array getArrVar() {
+	public ArrayList<Integer> getArrVar() {
 		return arrvar.get();
 	}
 
-	public void setArrVar(Array arrvar) {
+	public void setArrVar(ArrayList<Integer> arrvar) {
 		this.arrvar.set(arrvar);
 	}
 
-	public ObjectProperty<Array> arrvarProperty() {
+	public ObjectProperty<ArrayList<Integer>> arrvarProperty() {
 		return arrvar;
 	}
 
@@ -111,5 +109,5 @@ public class Topic {
 	public IntegerProperty idtypeProperty() {
 		return idtype;
 	}
-	
+
 }

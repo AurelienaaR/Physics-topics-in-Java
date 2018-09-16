@@ -1,7 +1,6 @@
 package model;
 
-import java.sql.Array;
-
+import java.util.ArrayList;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -19,7 +18,7 @@ public class Variable {
 	private final StringProperty title;
 	private final StringProperty content;
 	private final IntegerProperty idLevel;
-	private final ObjectProperty<Array> arrType;
+	private final ObjectProperty<ArrayList<Integer>> arrType;
 
 	/**
 	 * Constructor
@@ -36,7 +35,7 @@ public class Variable {
 	 */
 
 	public Variable(int id, int dim, int idExtensivity, int idContinuity, int idCharacteristics, String title,
-			String content, int idLevel, Array arrType) {
+			String content, int idLevel, ArrayList<Integer> arrType) {
 		this.id = new SimpleIntegerProperty(id);
 		this.dim = new SimpleIntegerProperty(dim);
 		this.idExtensivity = new SimpleIntegerProperty(idExtensivity);
@@ -45,7 +44,7 @@ public class Variable {
 		this.title = new SimpleStringProperty(title);
 		this.content = new SimpleStringProperty(content);
 		this.idLevel = new SimpleIntegerProperty(idLevel);
-		this.arrType = new SimpleObjectProperty<Array>(arrType);
+		this.arrType = new SimpleObjectProperty<ArrayList<Integer>>(arrType);
 	}
 
 	public int getId() {
@@ -136,15 +135,15 @@ public class Variable {
 		this.idLevel.set(idLevel);
 	}
 
-	public Array getArrType() {
+	public ArrayList<Integer> getArrType() {
 		return arrType.get();
 	}
 
-	public void setType(Array arrType) {
+	public void setType(ArrayList<Integer> arrType) {
 		this.arrType.set(arrType);
 	}
 
-	public ObjectProperty<Array> typeProperty() {
+	public ObjectProperty<ArrayList<Integer>> typeProperty() {
 		return arrType;
 	}
 

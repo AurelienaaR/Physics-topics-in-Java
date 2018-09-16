@@ -10,11 +10,9 @@ import java.awt.event.ItemListener;
 import java.sql.Array;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
@@ -249,46 +247,69 @@ public class WCreateElt extends JFrame implements ActionListener, ItemListener, 
 				wInfo.setVisible(false);
 				switch (iEltx) {
 				case 0:
-					int idCadx = listEnvironment.getSelectedIndex();
-					int idTypeDom = type.getSelectedIndex();
+					int idCadx = 1 + listEnvironment.getSelectedIndex();
+					int idTypeDom = 1 + type.getSelectedIndex();
 					int idXDom = idM + 1;
 					ArrayList<Domain> listDom = new ArrayList<Domain>();
-					if (titlex.matches("^[0-9.]+$") && idXDom > 0) {
+					if (idXDom > 0) {
 						listDom.add(new Domain(idXDom, idCadx, idTypeDom, titlex, contentx));
 						Connect.saveDomain(idXDom, idCadx, idTypeDom, titlex, contentx);
 					}
 					break;
 				case 1:
-					int idDomx = listEnvironment.getSelectedIndex();
-					int idTypeTop = type.getSelectedIndex();
-					ArrayList<Integer> arrVarx = new ArrayList<Integer>();
+					int idDomx = 1 + listEnvironment.getSelectedIndex();
+					int idTypeTop = 1 + type.getSelectedIndex();
 					int sizex = listModelVisible.getSize();
+					int idStr;
+					ArrayList<Integer> arrVarx = new ArrayList<Integer>();
+					String arrVarStr = "{";
 					for (int i = 0; i < sizex; i++) {
-						arrVarx.add(Connect.getIdByTitleVar(listModelVisible.elementAt(i)));
+						idStr = Connect.getIdByTitleVar(listModelVisible.elementAt(i));
+						arrVarStr += idStr;
+						if (i < sizex - 1) {
+							arrVarStr += ", ";
+						} else {
+							arrVarStr += "}";
+						}
+						arrVarx.add(idStr);
 					}
 					int idXTop = idM + 1;
 					ArrayList<Topic> listTop = new ArrayList<Topic>();
-					if (titlex.matches("^[0-9.]+$") && idXTop > 0) {
-						listTop.add(new Topic(idXTop, idDomx, titlex, (Array) arrVarx, contentx, idTypeTop));
-						Connect.saveTopic(idXTop, idDomx, titlex, (Array) arrVarx, contentx, idTypeTop);
+					if (idXTop > 0) {
+						listTop.add(new Topic(idXTop, idDomx, titlex, arrVarx, contentx, idTypeTop));
+						Connect.saveTopic(idXTop, idDomx, titlex, arrVarStr, contentx, idTypeTop);
 					}
 					break;
 				case 2:
-					int idLevel = listEnvironment.getSelectedIndex();
-					int idExtensivity = extensivity.getSelectedIndex();
-					int idContinuity = continuity.getSelectedIndex();
-					int idCharacteristics = characteristics.getSelectedIndex();
-					int typeIni = type.getSelectedIndex();
+					int idLevel = levelElt;
+					int idExtensivity = 1 + extensivity.getSelectedIndex();
+					int idContinuity = 1 + continuity.getSelectedIndex();
+					int idCharacteristics = 1 + characteristics.getSelectedIndex();
+					int typeIni = 1 + type.getSelectedIndex();
+					int sizeTx = listModelVisible.getSize();
 					ArrayList<Integer> arrType = new ArrayList<Integer>();
 					arrType.add(typeIni);
-					int dimInt = 1; // (int) getDim();
+					int dimInt = getDim();
+					int idSub;
+					ArrayList<Integer> arrTypx = new ArrayList<Integer>();
+					String arrTypStr = "{";
+					for (int iT = 0; iT < sizeTx; iT++) {
+						idSub = Connect.getIdByTitleSubVar(listModelVisible.get(iT));
+						arrTypStr += idSub;
+						if (iT < sizeTx - 1) {
+							arrTypStr += ", ";
+						} else {
+							arrTypStr += "}";
+						}
+						arrTypx.add(idSub);
+					}
 					int idXVar = idM + 1;
 					ArrayList<Variable> listVar = new ArrayList<Variable>();
-					if (titlex.matches("^[0-9.]+$") && idXVar > 0) {
+					if (idXVar > 0) { // titlex.matches("^[0-9.]+$") &&
 						listVar.add(new Variable(idXVar, dimInt, idExtensivity, idContinuity, idCharacteristics, titlex,
-								contentx, idLevel, (Array) arrType));
+								contentx, idLevel, arrTypx));
 						Connect.saveVariable(idXVar, dimInt, idExtensivity, idContinuity, idCharacteristics, titlex,
-								contentx, idLevel, (Array) arrType);
+								contentx, idLevel, arrTypStr);
 					}
 					break;
 				default:
@@ -296,16 +317,16 @@ public class WCreateElt extends JFrame implements ActionListener, ItemListener, 
 				}
 			}
 
-			public String getDim() {
+			public int getDim() {
 				int iRbSel = 0;
 				while (iRbSel < dimTab.length) {
 					if (dimOption[iRbSel].isSelected()) {
-						return dimOption[iRbSel].getText();
+						return iRbSel - 1; // dimOption[iRbSel].getText();
 					}
 					iRbSel++;
 				}
 				dimOK = iRbSel - 1;
-				return dimOption[0].getText();
+				return dimOK; // dimOption[0].getText();
 			}
 
 			public String getEnvironment(int iEl) {
@@ -371,14 +392,14 @@ public class WCreateElt extends JFrame implements ActionListener, ItemListener, 
 		panInt.add(contentElt, BorderLayout.CENTER);
 		panInt.add(control, BorderLayout.WEST);
 		panInt.setVisible(true);
-		subElt.add(0, "Tous les sous-éléments");
+		subElt.add("Tous les sous-éléments");
 		switch (iEltx) {
 		case 0:
 			ArrayList<Topic> topics = Connect.initTopic();
 			if (topics.size() > 0) {
 				for (Iterator<Topic> iter = topics.iterator(); iter.hasNext();) {
 					Topic t = iter.next();
-					subElt.add(t.getId(), t.getTitle());
+					subElt.add(t.getTitle()); // subElt.add(t.getId(), t.getTitle());
 				}
 			}
 			break;
@@ -387,7 +408,7 @@ public class WCreateElt extends JFrame implements ActionListener, ItemListener, 
 			if (variables.size() > 0) {
 				for (Iterator<Variable> iter = variables.iterator(); iter.hasNext();) {
 					Variable v = iter.next();
-					subElt.add(v.getId(), v.getTitle());
+					subElt.add(v.getTitle());
 				}
 			}
 			break;
@@ -396,7 +417,7 @@ public class WCreateElt extends JFrame implements ActionListener, ItemListener, 
 			if (subVariables.size() > 0) {
 				for (Iterator<Subvariable> iter = subVariables.iterator(); iter.hasNext();) {
 					Subvariable s = iter.next();
-					subElt.add(s.getId(), s.getTitle());
+					subElt.add(s.getTitle());
 				}
 			}
 			break;
@@ -415,7 +436,7 @@ public class WCreateElt extends JFrame implements ActionListener, ItemListener, 
 		contents.add(lblTitle, BorderLayout.NORTH);
 		panelCenter = new JPanel();
 		panelCenter.setBorder(environmentCenter);
-		labelListHidden = new JLabel("Hidden");
+		labelListHidden = new JLabel("Sous-éléments");
 		labelListHidden.setAlignmentX(LEFT_ALIGNMENT);
 		initHiddenModel();
 		listHidden = new JList<>(listModelHidden);
@@ -447,7 +468,7 @@ public class WCreateElt extends JFrame implements ActionListener, ItemListener, 
 		boxButtons.add(buttonRemoveAll);
 		panelCenter.add(boxButtons);
 		panelCenter.add(Box.createRigidArea(new Dimension(10, 1)));
-		labelListVisible = new JLabel("Visible");
+		labelListVisible = new JLabel("Sélection");
 		labelListVisible.setAlignmentX(LEFT_ALIGNMENT);
 		listVisible = new JList<>(listModelVisible);
 		listVisible.setAlignmentX(LEFT_ALIGNMENT);
@@ -595,17 +616,18 @@ public class WCreateElt extends JFrame implements ActionListener, ItemListener, 
 
 	private void displaySelectedItems() throws SQLException {
 		String itemName;
-		List<Integer> listType;
-		int iLevPlus;
+		int eltLevPlus;
+		ArrayList<Integer> iLevPlus = new ArrayList<Integer>();
+		ArrayList<Integer> typLevPlus = new ArrayList<Integer>();
 		ArrayList<Variable> listVar = Connect.initVariables();
+		ArrayList<ArrayList<Integer>> listType = new ArrayList<ArrayList<Integer>>();
 		for (int k = 0; k < listVar.size(); k++) {
-			Array Arrx = listVar.get(k).getArrType();
-			Integer[] typex = (Integer[]) Arrx.getArray();
-			listType = Arrays.asList(typex);
-			for (int i = 0; i < typex.length; i++) {
-				iLevPlus = listType.get(i);
-				if (iLevPlus < listVar.size()) {
-					// eltSup = listVar.get(iLevPlus);
+			typLevPlus = listVar.get(k).getArrType();
+			listType.add(typLevPlus);
+			for (int i = 0; i < typLevPlus.size(); i++) {
+				eltLevPlus = typLevPlus.get(i);
+				iLevPlus.add(eltLevPlus);
+				if (eltLevPlus < listVar.size()) {
 				}
 			}
 		}
@@ -643,6 +665,13 @@ public class WCreateElt extends JFrame implements ActionListener, ItemListener, 
 			for (String inTopX : inTopTot.get("title")) {
 				environments.get(iE).add(inTopX);
 				listModelEnvironment.addElement(inTopX);
+			}
+			break;
+		case 3:
+			inVarTot = Connect.varTotString();
+			for (String inVarX : inVarTot.get("title")) {
+				environments.get(iE).add(inVarX);
+				listModelEnvironment.addElement(inVarX);
 			}
 			break;
 		default:

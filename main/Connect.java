@@ -151,13 +151,36 @@ public class Connect {
 		return domainObj;
 	}
 
+	public static ArrayList<Integer> cvtArr(Array jj) {
+		ArrayList<Integer> arrA = new ArrayList<Integer>();
+		String uu = jj.toString();
+		int uuM = uu.length();
+		int jv = 0;
+		String uvj = "";
+		String uujv = "";
+		if (uuM > 1) {
+			while (jv < uuM - 1) {
+				jv++;
+				uvj = "";
+				uujv = uu.substring(jv, jv + 1);
+				while (!(uujv.equals(",")) && !(uujv.equals("}"))) {
+					uvj += uujv;
+					jv++;
+					uujv = uu.substring(jv, jv + 1);
+				}
+				arrA.add(Integer.parseInt(uvj));
+			}
+		}
+		return arrA;
+	}
+
 	public static ArrayList<Topic> initTopic() {
 		int idDomain;
 		int idType;
 		int idMTop = idMaxi(1);
 		String titleStr;
 		String contentStr;
-		Array varArr;
+		Array varAx;
 		ArrayList<Topic> topicObj = new ArrayList<Topic>();
 		List<String> query = new ArrayList<String>();
 		try {
@@ -168,6 +191,7 @@ public class Connect {
 			Connection conn = DriverManager.getConnection(url, user, passwd);
 			Statement state = conn.createStatement();
 			for (int iTop = 1; iTop <= idMTop; iTop++) {
+				ArrayList<Integer> varA = new ArrayList<Integer>();
 				query.add("SELECT * FROM topic t WHERE t.id = " + iTop);
 				ResultSet resTop = state.executeQuery(query.get(iTop - 1));
 				ResultSetMetaData resTo = resTop.getMetaData();
@@ -177,10 +201,11 @@ public class Connect {
 				while (resTop.next()) {
 					titleStr = resTop.getString("title");
 					contentStr = resTop.getString("content");
-					varArr = resTop.getArray("arrvar");
+					varAx = resTop.getArray("arrvar");
+					varA = cvtArr(varAx);
 					idType = resTop.getInt("idtype");
 					idDomain = resTop.getInt("iddomain");
-					topicObj.add(new Topic(iTop, idDomain, titleStr, varArr, contentStr, idType));
+					topicObj.add(new Topic(iTop, idDomain, titleStr, varA, contentStr, idType));
 				}
 				resTop.close();
 			}
@@ -219,6 +244,7 @@ public class Connect {
 				query.add("SELECT * FROM variables v WHERE v.id = " + i);
 				ResultSet resVar = state.executeQuery(query.get(i - 1));
 				ResultSetMetaData resVa = resVar.getMetaData();
+				ArrayList<Integer> typA = new ArrayList<Integer>();
 				for (int j = 1; j <= resVa.getColumnCount(); j++) {
 					resVa.getColumnName(j).toUpperCase();
 				}
@@ -227,13 +253,14 @@ public class Connect {
 					contentStr = resVar.getString("content");
 					levStr = resVar.getString("idlevel");
 					arrType = resVar.getArray("arrtype");
+					typA = cvtArr(arrType);
 					idCharacteristics = resVar.getInt("idcharacteristics");
 					dimInt = resVar.getInt("dim");
 					idExtensivity = resVar.getInt("idextensivity");
 					idContinuity = resVar.getInt("idcontinuity");
 					idLevel = resVar.getInt("idlevel");
 					variablesObj.add(new Variable(i, dimInt, idExtensivity, idContinuity, idCharacteristics, titleStr,
-							contentStr, idLevel, arrType));
+							contentStr, idLevel, typA));
 				}
 				resVar.close();
 			}
@@ -420,6 +447,13 @@ public class Connect {
 		ArrayList<String> titles = htVarx.get("title");
 		int idVar = 1 + titles.indexOf(titlex);
 		return idVar;
+	}
+
+	public static int getIdByTitleSubVar(String titlex) {
+		Hashtable<String, ArrayList<String>> htSubVarx = subVarTotString();
+		ArrayList<String> titles = htSubVarx.get("title");
+		int idSubVar = 1 + titles.indexOf(titlex);
+		return idSubVar;
 	}
 
 	public static Hashtable<String, ArrayList<String>> domString(int idDomain) {
@@ -668,6 +702,47 @@ public class Connect {
 		return htVar;
 	}
 
+	public static Hashtable<String, ArrayList<String>> subVarTotString() {
+		Hashtable<String, ArrayList<String>> htSubVar = new Hashtable<String, ArrayList<String>>();
+		try {
+			String colX;
+			Class.forName("org.postgresql.Driver");
+			String url = "jdbc:postgresql://localhost:5432/physvar";
+			String user = "postgres";
+			String passwd = mdp.mdp;
+			Connection conn = DriverManager.getConnection(url, user, passwd);
+			Statement state = conn.createStatement();
+			String query = "SELECT * FROM subvariables";
+			ResultSet resSubVar = state.executeQuery(query);
+			ResultSetMetaData resSubVa = resSubVar.getMetaData();
+			int jMaxi = resSubVa.getColumnCount();
+			ArrayList<String> colSubVar = new ArrayList<String>();
+			for (int jIni = 1; jIni <= jMaxi; jIni++) {
+				colSubVar.add(resSubVa.getColumnName(jIni));
+			}
+			resSubVar.close();
+			state.close();
+			Statement statex = conn.createStatement();
+			for (int j = 0; j < jMaxi; j++) {
+				ArrayList<String> htSubVarX = new ArrayList<String>();
+				colX = colSubVar.get(j);
+				ResultSet resSubVarx = statex.executeQuery(query);
+				ResultSetMetaData resSubVax = resSubVarx.getMetaData();
+				while (resSubVarx.next()) {
+					if (resSubVax.getColumnName(j + 1).equals(colX)) {
+						htSubVarX.add(resSubVarx.getString(colX));
+					}
+				}
+				htSubVar.put(colX, htSubVarX);
+				resSubVarx.close();
+			}
+			statex.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return htSubVar;
+	}
+
 	public static String[] extString(int idExt) {
 		List<String> query = new ArrayList<String>();
 		String titleStr = "";
@@ -780,7 +855,7 @@ public class Connect {
 		return levStr;
 	}
 
-	public static void saveDomain(int idMaxPlus, int idcadre, int idtype, String titleStr, String contentStr) {
+	public static void saveDomain(int idMaxPlus, int idcadre, int idtype, String titleStrx, String contentStrx) {
 		try {
 			Class.forName("org.postgresql.Driver");
 			String url = "jdbc:postgresql://localhost:5432/physvar";
@@ -788,16 +863,17 @@ public class Connect {
 			String passwd = mdp.mdp;
 			Connection conn = DriverManager.getConnection(url, user, passwd);
 			Statement state = conn.createStatement();
-			String querySaveDomain = "INSERT INTO domain ('id', 'idcadre', 'idtype', 'title', 'content') VALUES ("
-					+ idMaxPlus + ", " + idcadre + ", " + idtype + ", " + titleStr + ", " + contentStr + ");";
-			ResultSet resSDomain = state.executeQuery(querySaveDomain);
-			resSDomain.close();
+			String querySaveDomain = "INSERT INTO domain (id, idcadre, idtype, title, content) VALUES (" + idMaxPlus
+					+ ", " + idcadre + ", " + idtype + ", '" + titleStrx + "', '" + contentStrx + "')";
+			int resSDomain = state.executeUpdate(querySaveDomain);
+			System.out.println(resSDomain);
+			state.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	public static void saveTopic(int idMaxPlus, int idDomain, String titleStr, Array arrVar, String contentStr,
+	public static void saveTopic(int idMaxPlus, int idDomain, String titleStr, String arrVarStr, String contentStr,
 			int idType) {
 		try {
 			Class.forName("org.postgresql.Driver");
@@ -806,18 +882,19 @@ public class Connect {
 			String passwd = mdp.mdp;
 			Connection conn = DriverManager.getConnection(url, user, passwd);
 			Statement state = conn.createStatement();
-			String querySaveTopic = "INSERT INTO topic ('id', 'iddomain', 'title', 'arrvar', 'content', 'idtype') VALUES ("
-					+ idMaxPlus + ", " + idDomain + ", " + titleStr + ", " + arrVar + ", " + contentStr + ", " + idType
-					+ ");";
-			ResultSet resSTopic = state.executeQuery(querySaveTopic);
-			resSTopic.close();
+			String querySaveTopic = "INSERT INTO topic (id, iddomain, title, arrvar, content, idtype) VALUES ("
+					+ idMaxPlus + ", " + idDomain + ", '" + titleStr + "', '" + arrVarStr + "', '" + contentStr + "', "
+					+ idType + ")";
+			int resSTopic = state.executeUpdate(querySaveTopic);
+			System.out.println(resSTopic);
+			state.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
 	public static void saveVariable(int idMaxPlus, int dim, int idextensivity, int idcontinuity, int idcharacteristics,
-			String titleStr, String contentStr, int idlevel, Array arrtype) {
+			String titleStr, String contentStr, int idlevel, String arrTypeStr) {
 		try {
 			Class.forName("org.postgresql.Driver");
 			String url = "jdbc:postgresql://localhost:5432/physvar";
@@ -825,11 +902,12 @@ public class Connect {
 			String passwd = mdp.mdp;
 			Connection conn = DriverManager.getConnection(url, user, passwd);
 			Statement state = conn.createStatement();
-			String querySaveTopic = "INSERT ('id', 'dim', 'idextensivity', 'idcontinuity', 'idcharacteristics', 'title', 'content', 'idlevel', 'arrtype') INTO variables VALUES ("
+			String querySaveTopic = "INSERT INTO variables (id, dim, idextensivity, idcontinuity, idcharacteristics, title, content, idlevel, arrtype) VALUES ("
 					+ idMaxPlus + ", " + dim + ", " + idextensivity + ", " + idcontinuity + "," + idcharacteristics
-					+ ", " + titleStr + ", " + contentStr + ", " + idlevel + ", " + arrtype + ");";
-			ResultSet resSTopic = state.executeQuery(querySaveTopic);
-			resSTopic.close();
+					+ ", '" + titleStr + "', '" + contentStr + "', " + idlevel + ", '" + arrTypeStr + "')";
+			int resSVariable = state.executeUpdate(querySaveTopic);
+			System.out.println(resSVariable);
+			state.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -9,7 +9,7 @@ public class WindowDialInfo extends JDialog {
 	private static final long serialVersionUID = 1L;
 	private String domain;
 	private String type;
-	private String dim;
+	private int dim;
 	private String title;
 	private String content;
 	
@@ -17,7 +17,7 @@ public class WindowDialInfo extends JDialog {
 	public WindowDialInfo() {
 	}
 
-	public WindowDialInfo(String domain, String type, String dim, String title, String content) {
+	public WindowDialInfo(String domain, String type, int dim, String title, String content) {
 		this.domain = domain;
 		this.type = type;
 		this.dim = dim;
