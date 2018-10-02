@@ -33,13 +33,11 @@ import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import listeners.CharacteristicsListener;
-import listeners.ContinuityListener;
 import listeners.DimListener;
-import listeners.ExtensivityListener;
 import listeners.TypeListener;
 import model.Cadre;
 import model.Domain;
+import model.ListBox;
 import model.Subvariable;
 import model.Topic;
 import model.Variable;
@@ -95,24 +93,33 @@ public class WCreateElt extends JFrame implements ActionListener, ItemListener, 
 	private DefaultListModel<String> listModelVisible = new DefaultListModel<String>();
 	private DefaultListModel<String> listModelHidden = new DefaultListModel<String>();
 	private DefaultComboBoxModel<String> listModelEnvironment = new DefaultComboBoxModel<String>();
-	public static String[] typeTab[] = { { "Qualitatif", "Empirique", "Evaluation", "Prospectif", "Théorique" },
-			{ "Scalaires discrets", "Scalaires continus", "Vecteurs", "Tenseurs, matrices", "Autre" },
-			{ "Ordres de grandeur", "Mesures", "Théoriques" } };
-	public static String[] extensivityTab[] = { { "Extensif", "Intensif", "Autre" },
-			{ "Extensif", "Intensif", "Autre" }, { "Extensif", "Intensif", "Autre" } };
-	public static String[] continuityTab[] = {
-			{ "Système de N points", "Système ponctuel", "Système linéaire", "Système surfacique", "Système volumique",
-					"Système stochastique", "Autre" },
-			{ "Continu", "Discret", "Aléatoire", "Discontinu", "Autre" },
-			{ "Continu", "Discret", "Aléatoire", "Discontinu" } };
-	public static String[] characteristicsTab[] = {
-			{ "Système fermé", "Système isolé", "Système ouvert", "Système implicite", "Autre" },
-			{ "Ordres de grandeur", "Ordres de variation", "Valeurs précises", "Valeurs estimées", "Autre" },
-			{ "Réel", "Complexe", "Entier", "Autre" } };
-	public static String[] dimTab[] = {
-			{ "Espace-temps", "Système d'états", "Système stationnaire", "Système variable", "Autre" },
-			{ "-1 - questions", "0 - état", "1 - solutions - causes directes", "2 - solutions - champ d'évolutions" },
-			{ "continues", "discretes", "ondes" }, { "fonctions ondes", "potentiel de jauge" } };
+	// public static String[] typeTab[] = { { "Qualitatif", "Empirique",
+	// "Evaluation", "Prospectif", "Théorique" },
+	// { "Scalaires discrets", "Scalaires continus", "Vecteurs", "Tenseurs,
+	// matrices", "Autre" },
+	// { "Ordres de grandeur", "Mesures", "Théoriques" } };
+	// public static String[] extensivityTab[] = { { "Extensif", "Intensif", "Autre"
+	// },
+	// { "Extensif", "Intensif", "Autre" }, { "Extensif", "Intensif", "Autre" } };
+	// public static String[] continuityTab[] = {
+	// { "Système de N points", "Système ponctuel", "Système linéaire", "Système
+	// surfacique", "Système volumique",
+	// "Système stochastique", "Autre" },
+	// { "Continu", "Discret", "Aléatoire", "Discontinu", "Autre" },
+	// { "Continu", "Discret", "Aléatoire", "Discontinu" } };
+	// public static String[] characteristicsTab[] = {
+	// { "Système fermé", "Système isolé", "Système ouvert", "Système implicite",
+	// "Autre" },
+	// { "Ordres de grandeur", "Ordres de variation", "Valeurs précises", "Valeurs
+	// estimées", "Autre" },
+	// { "Réel", "Complexe", "Entier", "Autre" } };
+	// public static String[] dimTab[] = {
+	// { "Espace-temps", "Système d'états", "Système stationnaire", "Système
+	// variable", "Autre" },
+	// { "-1 - questions", "0 - état", "1 - solutions - causes directes", "2 -
+	// solutions - champ d'évolutions" },
+	// { "continues", "discretes", "ondes" }, { "fonctions ondes", "potentiel de
+	// jauge" } };
 	public static String[] environnementTab = { "cadre", "domain", "topic" };
 	public static String[] eltTab = { "domaine", "thème", "variables" };
 	int dimOK;
@@ -148,72 +155,111 @@ public class WCreateElt extends JFrame implements ActionListener, ItemListener, 
 		panInt.setSize(1400, 360);
 		// Type
 		JPanel panType = new JPanel();
-		panType.setPreferredSize(new Dimension(420, 160));
+		panType.setPreferredSize(new Dimension(220, 160));
 		panType.setBorder(BorderFactory.createTitledBorder("Type de " + elt));
-		JComboBox<String> type = new JComboBox<String>();
-		TypeListener typeListener = new TypeListener();
-		for (int iTy = 0; iTy < typeTab[iEltx].length; iTy++) {
-			type.addItem(typeTab[iEltx][iTy]);
+		ArrayList<String> typeL = new ArrayList<String>();
+		ArrayList<ListBox> typeListing = Connect.typeITString(iEltx);
+		for (ListBox typeX : typeListing) {
+			typeL.add(typeX.getTitle());
 		}
-		type.addActionListener(typeListener);
+		JComboBox<String> typey = new JComboBox<String>();
+		TypeListener typeListener = new TypeListener();
+		for (int iTy = 0; iTy < typeL.size(); iTy++) {
+			typey.addItem(typeL.get(iTy));
+		}
+		typey.addActionListener(typeListener);
 		JLabel typeLabel = new JLabel("Type : ");
 		panType.add(typeLabel);
-		panType.add(type);
+		panType.add(typey);
 		// Extensivity
 		JPanel panExtensivity = new JPanel();
-		panExtensivity.setPreferredSize(new Dimension(220, 60));
-		panExtensivity.setBorder(BorderFactory.createTitledBorder("Extensivité de " + elt));
-		JComboBox<String> extensivity = new JComboBox<String>();
-		ExtensivityListener extensivityListener = new ExtensivityListener();
-		for (int iTy = 0; iTy < extensivityTab[iEltx].length; iTy++) {
-			extensivity.addItem(extensivityTab[iEltx][iTy]);
+		panExtensivity.setPreferredSize(new Dimension(220, 120));
+		panExtensivity.setBorder(BorderFactory.createTitledBorder("Extensivités disponibles"));
+		ArrayList<String> extensivityL = new ArrayList<String>();
+		ArrayList<ListBox> extensivityListing = Connect.extensivityITString(iEltx);
+		for (ListBox extensivityX : extensivityListing) {
+			extensivityL.add(extensivityX.getTitle());
 		}
-		extensivity.addActionListener(extensivityListener);
-		JLabel extensivityLabel = new JLabel("Extensivité : ");
-		panType.add(extensivityLabel);
-		panType.add(extensivity);
+		JComboBox<String> extensivityy = new JComboBox<String>();
+		TypeListener extensivitysListener = new TypeListener();
+		for (int iTy = 0; iTy < extensivityL.size(); iTy++) {
+			extensivityy.addItem(extensivityL.get(iTy));
+		}
+		extensivityy.addActionListener(extensivitysListener);
+		JLabel extensivitysLabel = new JLabel("Extensivités : ");
+		panExtensivity.add(extensivitysLabel);
+		panExtensivity.add(extensivityy);
+		panExtensivity.setVisible(true);
+		// int ixTopx = extensivityy.getSelectedIndex();
 		// Continuity
 		JPanel panContinuity = new JPanel();
-		panContinuity.setPreferredSize(new Dimension(220, 60));
-		panContinuity.setBorder(BorderFactory.createTitledBorder("Continuité de " + elt));
-		JComboBox<String> continuity = new JComboBox<String>();
-		ContinuityListener continuityListener = new ContinuityListener();
-		for (int iTy = 0; iTy < continuityTab[iEltx].length; iTy++) {
-			continuity.addItem(continuityTab[iEltx][iTy]);
+		panContinuity.setPreferredSize(new Dimension(220, 120));
+		panContinuity.setBorder(BorderFactory.createTitledBorder("Extensivités disponibles"));
+		ArrayList<String> continuityL = new ArrayList<String>();
+		ArrayList<ListBox> continuityListing = Connect.continuityITString(iEltx);
+		for (ListBox continuityX : continuityListing) {
+			continuityL.add(continuityX.getTitle());
 		}
-		continuity.addActionListener(continuityListener);
-		JLabel continuityLabel = new JLabel("Continuité : ");
-		panType.add(continuityLabel);
-		panType.add(continuity);
+		JComboBox<String> continuityy = new JComboBox<String>();
+		TypeListener continuitysListener = new TypeListener();
+		for (int iTy = 0; iTy < continuityL.size(); iTy++) {
+			continuityy.addItem(continuityL.get(iTy));
+		}
+		continuityy.addActionListener(continuitysListener);
+		JLabel continuitysLabel = new JLabel("Extensivités : ");
+		panContinuity.add(continuitysLabel);
+		panContinuity.add(continuityy);
+		panContinuity.setVisible(true);
+		// int ixContx = continuityy.getSelectedIndex();
+		// int idContx = continuityListing.get(ixContx).getId();
 		// Characteristics
 		JPanel panCharacteristics = new JPanel();
-		panCharacteristics.setPreferredSize(new Dimension(220, 60));
-		panCharacteristics.setBorder(BorderFactory.createTitledBorder("Caracteristiques de " + elt));
-		JComboBox<String> characteristics = new JComboBox<String>();
-		CharacteristicsListener characteristicsListener = new CharacteristicsListener();
-		for (int iTy = 0; iTy < characteristicsTab[iEltx].length; iTy++) {
-			characteristics.addItem(characteristicsTab[iEltx][iTy]);
+		panCharacteristics.setPreferredSize(new Dimension(220, 120));
+		panCharacteristics.setBorder(BorderFactory.createTitledBorder("Caractéristiques disponibles"));
+		ArrayList<String> characteristicsL = new ArrayList<String>();
+		ArrayList<ListBox> characteristicsListing = Connect.characteristicsITString(iEltx);
+		for (ListBox characteristicsX : characteristicsListing) {
+			characteristicsL.add(characteristicsX.getTitle());
 		}
-		characteristics.addActionListener(characteristicsListener);
-		JLabel characteristicsLabel = new JLabel("Caracteristiques : ");
-		panType.add(characteristicsLabel);
-		panType.add(characteristics);
+		JComboBox<String> characteristicsy = new JComboBox<String>();
+		TypeListener characteristicssListener = new TypeListener();
+		for (int iTy = 0; iTy < characteristicsL.size(); iTy++) {
+			characteristicsy.addItem(characteristicsL.get(iTy));
+		}
+		characteristicsy.addActionListener(characteristicssListener);
+		JLabel characteristicssLabel = new JLabel("Extensivités : ");
+		panCharacteristics.add(characteristicssLabel);
+		panCharacteristics.add(characteristicsy);
+		panCharacteristics.setVisible(true);
+		// int ixChar = characteristicsy.getSelectedIndex();
+		// int idCharx = characteristicsListing.get(ixTopx).getId();
 		// Dimension
-		JPanel panDim = new JPanel();
-		panDim.setBorder(BorderFactory.createTitledBorder("Dimension de " + elt));
-		panDim.setPreferredSize(new Dimension(440, 90));
+		JPanel panDimension = new JPanel();
+		panDimension.setPreferredSize(new Dimension(220, 90));
+		panDimension.setBorder(BorderFactory.createTitledBorder("Dimensions disponibles"));
+		ArrayList<String> dimensionL = new ArrayList<String>();
+		ArrayList<ListBox> dimensionListing = Connect.dimensionITString(iEltx);
+		for (ListBox dimensionX : dimensionListing) {
+			dimensionL.add(dimensionX.getTitle());
+		}
+		JComboBox<String> dimensiony = new JComboBox<String>();
+		// DimListener dimensionsListener = new DimListener();
+		JLabel dimensionsLabel = new JLabel("Dimensions : ");
+		panDimension.add(dimensionsLabel);
 		ButtonGroup group = new ButtonGroup();
-		JRadioButton dimOption[] = new JRadioButton[12];
+		JRadioButton dimOption[] = new JRadioButton[20];
 		ButtonGroup bg = new ButtonGroup();
 		DimListener dimListener = new DimListener();
-		for (int iRb = 0; iRb < dimTab[iEltx].length; iRb++) {
-			dimOption[iRb] = new JRadioButton(dimTab[iEltx][iRb]);
+		for (int iRb = 0; iRb < dimensionL.size(); iRb++) {
+			dimOption[iRb] = new JRadioButton(dimensionL.get(iRb));
 			dimOption[iRb].addActionListener(dimListener);
 			group.add(dimOption[iRb]);
 			bg.add(dimOption[iRb]);
-			panDim.add(dimOption[iRb]);
+			panDimension.add(dimOption[iRb]);
 		}
 		dimOption[0].setSelected(true);
+		// int ixDim = dimensiony.getSelectedIndex();
+		// int idDimx = dimensionListing.get(ixTopx).getId();
 		JPanel panTitle = new JPanel();
 		panTitle.setPreferredSize(new Dimension(520, 60));
 		panTitle.setBorder(BorderFactory.createTitledBorder("Titre de " + elt));
@@ -224,7 +270,9 @@ public class WCreateElt extends JFrame implements ActionListener, ItemListener, 
 		panTitle.add(titleJ);
 		JPanel content = new JPanel();
 		content.add(panType);
-		content.add(panDim);
+		content.add(panExtensivity);
+		content.add(panCharacteristics);
+		content.add(panDimension);
 		content.add(panTitle);
 		JPanel panContentElt = new JPanel();
 		panContentElt.setPreferredSize(new Dimension(520, 230));
@@ -242,13 +290,13 @@ public class WCreateElt extends JFrame implements ActionListener, ItemListener, 
 			public void actionPerformed(ActionEvent arg0) {
 				String titlex = getTitle();
 				String contentx = getContent();
-				WindowDialInfo wInfo = new WindowDialInfo(getEnvironment(iEltx), (String) type.getSelectedItem(),
-						getDim(), titlex, contentx);
+				WindowDialInfo wInfo = new WindowDialInfo(getEnvironment(iEltx), (String) typey.getSelectedItem(),
+						(int) dimensiony.getSelectedIndex(), titlex, contentx);
 				wInfo.setVisible(false);
 				switch (iEltx) {
 				case 0:
 					int idCadx = 1 + listEnvironment.getSelectedIndex();
-					int idTypeDom = 1 + type.getSelectedIndex();
+					int idTypeDom = 1 + typey.getSelectedIndex();
 					int idXDom = idM + 1;
 					ArrayList<Domain> listDom = new ArrayList<Domain>();
 					if (idXDom > 0) {
@@ -258,7 +306,7 @@ public class WCreateElt extends JFrame implements ActionListener, ItemListener, 
 					break;
 				case 1:
 					int idDomx = 1 + listEnvironment.getSelectedIndex();
-					int idTypeTop = 1 + type.getSelectedIndex();
+					int idTypeTop = 1 + typey.getSelectedIndex();
 					int sizex = listModelVisible.getSize();
 					int idStr;
 					ArrayList<Integer> arrVarx = new ArrayList<Integer>();
@@ -282,14 +330,15 @@ public class WCreateElt extends JFrame implements ActionListener, ItemListener, 
 					break;
 				case 2:
 					int idLevel = levelElt;
-					int idExtensivity = 1 + extensivity.getSelectedIndex();
-					int idContinuity = 1 + continuity.getSelectedIndex();
-					int idCharacteristics = 1 + characteristics.getSelectedIndex();
-					int typeIni = 1 + type.getSelectedIndex();
+					int idExtensivity = 1 + extensivityy.getSelectedIndex();
+					int idContinuity = 1 + continuityy.getSelectedIndex();
+					int idCharacteristics = 1 + characteristicsy.getSelectedIndex();
+					int typeIni = 1 + typey.getSelectedIndex();
 					int sizeTx = listModelVisible.getSize();
+					int dimInt = 1 + dimensiony.getSelectedIndex();
 					ArrayList<Integer> arrType = new ArrayList<Integer>();
 					arrType.add(typeIni);
-					int dimInt = getDim();
+
 					int idSub;
 					ArrayList<Integer> arrTypx = new ArrayList<Integer>();
 					String arrTypStr = "{";
@@ -315,18 +364,6 @@ public class WCreateElt extends JFrame implements ActionListener, ItemListener, 
 				default:
 					break;
 				}
-			}
-
-			public int getDim() {
-				int iRbSel = 0;
-				while (iRbSel < dimTab.length) {
-					if (dimOption[iRbSel].isSelected()) {
-						return iRbSel - 1; // dimOption[iRbSel].getText();
-					}
-					iRbSel++;
-				}
-				dimOK = iRbSel - 1;
-				return dimOK; // dimOption[0].getText();
 			}
 
 			public String getEnvironment(int iEl) {

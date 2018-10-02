@@ -12,6 +12,7 @@ import java.util.List;
 import constantes.mdp;
 import model.Cadre;
 import model.Domain;
+import model.ListBox;
 import model.Subvariable;
 import model.Topic;
 import model.Variable;
@@ -442,6 +443,13 @@ public class Connect {
 		return domTot;
 	}
 
+	public static int getIdByTitleTopic(String titlex) {
+		Hashtable<String, ArrayList<String>> htTopx = topTotString();
+		ArrayList<String> titles = htTopx.get("title");
+		int idTop = 1 + titles.indexOf(titlex);
+		return idTop;
+	}
+
 	public static int getIdByTitleVar(String titlex) {
 		Hashtable<String, ArrayList<String>> htVarx = varTotString();
 		ArrayList<String> titles = htVarx.get("title");
@@ -569,6 +577,7 @@ public class Connect {
 						hidTopX.add(resTopx.getString(colX));
 					}
 				}
+				System.out.println(hidTopX);
 				hidTop.put(colX, hidTopX);
 				resTopx.close();
 			}
@@ -576,6 +585,7 @@ public class Connect {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		System.out.println(hidTop);
 		return hidTop;
 	}
 
@@ -618,6 +628,194 @@ public class Connect {
 			e.printStackTrace();
 		}
 		return htTop;
+	}
+
+	public static ArrayList<ListBox> topicITString(int iEltx) {
+		ArrayList<ListBox> htTopic = new ArrayList<ListBox>();
+		try {
+			int idX;
+			int eltX;
+			String titleX;
+			String contentX;
+			ListBox topiX;
+			Class.forName("org.postgresql.Driver");
+			String url = "jdbc:postgresql://localhost:5432/physvar";
+			String user = "postgres";
+			String passwd = mdp.mdp;
+			Connection conn = DriverManager.getConnection(url, user, passwd);
+			Statement state = conn.createStatement();
+			String query = "SELECT * FROM topic";
+			ResultSet resTopx = state.executeQuery(query);
+			while (resTopx.next()) {
+				idX = resTopx.getInt("id");
+				eltX = 1;
+				titleX = resTopx.getString("title");
+				contentX = resTopx.getString("content");
+				topiX = new ListBox(idX, eltX, titleX, contentX);
+				htTopic.add(topiX);
+			}
+			resTopx.close();
+
+			state.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return htTopic;
+	}
+
+	public static ArrayList<ListBox> characteristicsITString(int eltX) {
+		ArrayList<ListBox> htChar = new ArrayList<ListBox>();
+		try {
+			int idX;
+			String titleX;
+			String contentX;
+			ListBox chariX;
+			Class.forName("org.postgresql.Driver");
+			String url = "jdbc:postgresql://localhost:5432/physvar";
+			String user = "postgres";
+			String passwd = mdp.mdp;
+			Connection conn = DriverManager.getConnection(url, user, passwd);
+			Statement state = conn.createStatement();
+			String query = "SELECT * FROM characteristics WHERE elt = " + eltX;
+			ResultSet resCharx = state.executeQuery(query);
+			while (resCharx.next()) {
+				idX = resCharx.getInt("id");
+				titleX = resCharx.getString("title");
+				contentX = resCharx.getString("content");
+				chariX = new ListBox(idX, eltX, titleX, contentX);
+				htChar.add(chariX);
+			}
+			resCharx.close();
+
+			state.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return htChar;
+	}
+
+	public static ArrayList<ListBox> continuityITString(int eltX) {
+		ArrayList<ListBox> htCont = new ArrayList<ListBox>();
+		try {
+			int idX;
+			String titleX;
+			String contentX;
+			ListBox chariX;
+			Class.forName("org.postgresql.Driver");
+			String url = "jdbc:postgresql://localhost:5432/physvar";
+			String user = "postgres";
+			String passwd = mdp.mdp;
+			Connection conn = DriverManager.getConnection(url, user, passwd);
+			Statement state = conn.createStatement();
+			String query = "SELECT * FROM continuity WHERE elt = " + eltX;
+			ResultSet resContx = state.executeQuery(query);
+			while (resContx.next()) {
+				idX = resContx.getInt("id");
+				titleX = resContx.getString("title");
+				contentX = resContx.getString("content");
+				chariX = new ListBox(idX, eltX, titleX, contentX);
+				htCont.add(chariX);
+			}
+			resContx.close();
+
+			state.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return htCont;
+	}
+
+	public static ArrayList<ListBox> extensivityITString(int eltX) {
+		ArrayList<ListBox> htExt = new ArrayList<ListBox>();
+		try {
+			int idX;
+			String titleX;
+			String contentX;
+			ListBox chariX;
+			Class.forName("org.postgresql.Driver");
+			String url = "jdbc:postgresql://localhost:5432/physvar";
+			String user = "postgres";
+			String passwd = mdp.mdp;
+			Connection conn = DriverManager.getConnection(url, user, passwd);
+			Statement state = conn.createStatement();
+			String query = "SELECT * FROM extensivity WHERE elt = " + eltX;
+			ResultSet resExtx = state.executeQuery(query);
+			while (resExtx.next()) {
+				idX = resExtx.getInt("id");
+				titleX = resExtx.getString("title");
+				contentX = resExtx.getString("content");
+				chariX = new ListBox(idX, eltX, titleX, contentX);
+				htExt.add(chariX);
+			}
+			resExtx.close();
+
+			state.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return htExt;
+	}
+
+	public static ArrayList<ListBox> dimensionITString(int eltX) {
+		ArrayList<ListBox> htDim = new ArrayList<ListBox>();
+		try {
+			int idX;
+			String titleX;
+			String contentX;
+			ListBox chariX;
+			Class.forName("org.postgresql.Driver");
+			String url = "jdbc:postgresql://localhost:5432/physvar";
+			String user = "postgres";
+			String passwd = mdp.mdp;
+			Connection conn = DriverManager.getConnection(url, user, passwd);
+			Statement state = conn.createStatement();
+			String query = "SELECT * FROM dimension WHERE elt = " + eltX;
+			ResultSet resDimx = state.executeQuery(query);
+			while (resDimx.next()) {
+				idX = resDimx.getInt("id");
+				titleX = resDimx.getString("title");
+				contentX = resDimx.getString("content");
+				chariX = new ListBox(idX, eltX, titleX, contentX);
+				htDim.add(chariX);
+			}
+			resDimx.close();
+
+			state.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return htDim;
+	}
+
+	public static ArrayList<ListBox> typeITString(int eltX) {
+		ArrayList<ListBox> htType = new ArrayList<ListBox>();
+		try {
+			int idX;
+			String titleX;
+			String contentX;
+			ListBox chariX;
+			Class.forName("org.postgresql.Driver");
+			String url = "jdbc:postgresql://localhost:5432/physvar";
+			String user = "postgres";
+			String passwd = mdp.mdp;
+			Connection conn = DriverManager.getConnection(url, user, passwd);
+			Statement state = conn.createStatement();
+			String query = "SELECT * FROM typeelt WHERE elt = " + eltX;
+			ResultSet resTypex = state.executeQuery(query);
+			while (resTypex.next()) {
+				idX = resTypex.getInt("id");
+				titleX = resTypex.getString("title");
+				contentX = resTypex.getString("content");
+				chariX = new ListBox(idX, eltX, titleX, contentX);
+				htType.add(chariX);
+			}
+			resTypex.close();
+
+			state.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return htType;
 	}
 
 	public static Hashtable<String, ArrayList<String>> varString(int idVar) {
